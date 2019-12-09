@@ -48,12 +48,13 @@ mod=function() {
   U.max.c <- 1 - 1 / exp(lnalpha.c.nonneg)
   
 # GENERATE Y+A-1 = 33 MATURITY SCHEDULES, ONE PER BROOD YEAR (eq.4-6)
-  D.scale ~ dunif(0,1)
-  D <- 1 / (D.scale * D.scale)
-  pi[1] ~ dbeta(0.2,0.8)#eq.6
-  pi.2p ~ dbeta(0.2,0.6)
+  D.scale ~ dunif(0,1)#uninformative
+  D.sum <- 1 / (D.scale * D.scale)
+  pi.2p ~ dbeta(1,1)#uninformative
+  pi.1 ~ dbeta(1,1)#uninformative; Eq.6
+  pi[1] <- pi.1
   pi[2] <- pi.2p * (1 - pi[1])
-  pi[3] <- (1 - pi[1] - pi[2])
+  pi[3] <- 1 - pi[1] - pi[2]
   
   for (a in 1:A) {
     gamma[a] <- D * pi[a]#eq.6

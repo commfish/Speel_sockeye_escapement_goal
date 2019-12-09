@@ -1,6 +1,5 @@
 # this code gets sourced from this file, 
-# and creates the "inits" object, which is the used in
-# the main script
+# and creates the "inits" object, which is the used in the main script
 
 # inital values 
 B.scale = 0.3759

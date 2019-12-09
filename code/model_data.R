@@ -1,6 +1,5 @@
 # this code gets sourced from this file, 
-# and creates the "dat" object, which is then used in
-# the main script
+# and creates the "dat" object, which is then used in the main script
 library(tidyverse)
 library(dplyr)
 library(tidyr)
