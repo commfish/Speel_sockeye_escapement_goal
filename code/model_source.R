@@ -3,14 +3,6 @@
 #analysis----
 #State Space Model Function
 mod=function() {
-  #  RICKER STOCK-RECRUIT RELATIONSHIP WITH AR1 ERRORS;
-  #  R[y] IS THE TOTAL RETURN FROM BROOD YEAR y
-  #  Y=31; A=3; a.min=4; a.max=6;
-  #  THERE ARE A TOTAL OF Y+A-1 = 31 + 3 - 1 = 33 BROOD YRS REPRESENTED IN DATA (INCL FORECAST)
-  #  THE FIRST a.max = 6 DO NOT HAVE CORRESPONDING SPAWNING ABUNDANCES (BY 1977-1982)
-  #  THE REMAINING Y-a.min = 27 DO (BROOD YEARS A+a.min=7 - 33)  (BY 1983-2009)
-  
-  
   for (c in A+a.min:C) {
     log.R[c] ~ dnorm(log.R.mean2[c],tau.R)
     R[c] <- exp(log.R[c])
@@ -38,14 +30,14 @@ mod=function() {
   S.max <- 1 / beta #eq.20
   
   
-  # THE FIRST SEVERAL COHORTS ORIGINATE FROM UNMONITORED SPAWNING EVENTS
-  # DRAW THESE RETURNS FROM A COMMON LOGNORMAL DISTRIBUTION #eq. 17-21
+# THE FIRST SEVERAL COHORTS ORIGINATE FROM UNMONITORED SPAWNING EVENTS
+# DRAW THESE RETURNS FROM A COMMON LOGNORMAL DISTRIBUTION #eq. 17-21
   R.O<-exp(mean.log.RO)
   for (c in 1:a.max) { 
     log.R[c] ~ dnorm(mean.log.RO,tau.RO) 
     R[c] <- exp(log.R[c]) 
   }
-  #CORRECTION FOR LOGNORMAL SKEWNESS
+# CORRECTION FOR LOGNORMAL SKEWNESS
   alpha.c <- min(exp(lnalpha.c),1.0E4)
   positive.lna.c <- step(lnalpha.c)
   lnalpha.c.nonneg <- lnalpha.c * positive.lna.c
@@ -55,7 +47,7 @@ mod=function() {
   S.msy.c <- U.msy.c / beta
   U.max.c <- 1 - 1 / exp(lnalpha.c.nonneg)
   
-  # GENERATE Y+A-1 = 33 MATURITY SCHEDULES, ONE PER BROOD YEAR (eq.4-6)
+# GENERATE Y+A-1 = 33 MATURITY SCHEDULES, ONE PER BROOD YEAR (eq.4-6)
   D.scale ~ dunif(0,1)
   D <- 1 / (D.scale * D.scale)
   pi[1] ~ dbeta(0.2,0.8)#eq.6
@@ -71,15 +63,14 @@ mod=function() {
     }
   }
   
-  
-  # CALCULATE THE NUMBERS AT AGE MATRIX
+# CALCULATE THE NUMBERS AT AGE MATRIX
   for(a in 1:A){
     for(y in a:(Y+(a-1))){
       N.ya[y-(a-1),(A+1-a)]<-R[y]*p[y,(A+1-a)] #eq.3
     }
   }
   
-  # MULTINOMIAL SCALE SAMPLING ON TOTAL ANNUAL RETURN N #eq.13
+# MULTINOMIAL SCALE SAMPLING ON TOTAL ANNUAL RETURN N #eq.13
   for (y in 1:Y) {
     N[y] <- sum(N.ya[y,1:A])
     for (a in 1:A) {
@@ -90,9 +81,7 @@ mod=function() {
   }
   
   
-  # HARVESTS BELOW (No harvest above)#eq.13
-  # ASSUME 10% CV FOR H^BELOW
-  #Must now use hierarchical harvest rates
+# HARVESTS BELOW (No harvest above)#eq.13
   B.scale ~ dunif(0,1)
   mu ~ dbeta(0.1,0.1)
   B.sum<-1/B.scale/B.scale
