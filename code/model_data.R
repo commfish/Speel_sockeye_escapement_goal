@@ -15,9 +15,9 @@ A<-3
 #data clean---- 
 year <- as.numeric(as.character(rawdat$year)) 
 w <- as.numeric(as.character(rawdat$w)) 
-cv.w <- as.numeric(as.character(rawdat$cv.ww)) 
+cv.w <- as.numeric(as.character(rawdat$cv.w)) 
 h.b <- as.numeric(as.character(rawdat$h.b)) #harvest below weir
-cv.hb <- as.numeric(as.character(rawdat$cv.ha))
+cv.hb <- as.numeric(as.character(rawdat$cv.hb))
 x<-as.matrix(rawdat[,substr(colnames(rawdat), 1,1)=="x"])#age comp count data matrix ; these need to be integers 
 colnames(x)<-NULL 
 n.a<-rowSums(x) # age comp sample sizes 
