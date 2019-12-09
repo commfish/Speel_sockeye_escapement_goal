@@ -33,7 +33,8 @@ library(extrafont)
 # if test runs then do sensitivity tests with explore, and final run with full
 # "explore" version takes ~10min with the current settings.
 out.label <-  "rjags_base_case" 
-jags.settings <- "full"  # "test" or "explore" or full" 
+package.use <- "rjags"  #"rjags"  or "R2jags"
+jags.settings <- "test"  # "test" or "explore" or full" 
 sensitivity.analysis <- 0 #0 1 is yes and 0 is no
 
 # source the model file (this reads in a function called "mod")
@@ -42,7 +43,7 @@ sensitivity.analysis <- 0 #0 1 is yes and 0 is no
 # if you get a dmulti error, then the age comps are not whole numbers
 source("code/model_source.R") 
 print(mod)
-model_file_loc=paste("code/","Taku_sockeye.txt", sep="") # where to write the model file
+model_file_loc=paste("code/","Speel_sockeye.txt", sep="") # where to write the model file
 write.model(mod, model_file_loc)
 
 # load custom functions
@@ -77,29 +78,22 @@ source("code/model_data.R")
 source("code/model_inits.R")
 
 # STEP 3: RUN THE MODEL AND PROCESS THE OUTPUT----
-# 2 options: rjags or R2jags
+# 2 options: rjags 
 
 # This step does the actual MCMC sampling. All subsequent steps
-# should just extract from "post" without rerunning the model
-parameters <- c('alpha','lnalpha','lnalpha.c','beta' ,'phi', 'sigma.R',
-'S.eq.c', 'S.max', 'D.sum','pi','S.msy.c','S.msy.c.80','U.msy.c',
-'S.msy.c2', 'S.msy.c2.80','U.msy.c2')
 
 # start the timer
-# R2jags
-start.jags <- proc.time()
 
+start.jags <- proc.time()
 #rjags
 if(package.use == "rjags" & sensitivity.analysis == 0){
-  parameters <- c('S.eq.c','S.msy.c','U.msy.c','alpha','beta',
-                  'lnalpha','lnalpha.c','phi','sigma.R','log.resid.0', 'mean.log.RO',
-                  'S','R','N','log.resid','mu.hbelow','pi','h.below','N.ya',
-                  'p','q', 'S.max','D.sum','D.scale','sigma.RO',
-                  'S.eq.c2', 'U.msy.c2', 'S.msy.c2', 'U.max.c2', 'mu', 
-                  'mu.habove', 'h.above', 'inriver.run','S.msy.c.80','S.msy.c2.80','mu.habove_wild',
-                  'mu.hbelow_wild', 'lnRS')
+  parameters <- c('alpha','beta', 'lnalpha','lnalpha.c','phi',
+                  'sigma.R','log.resid.0', 'mean.log.R0','log.resid',
+                  'S','R','N','mu.hbelow','pi','h.below','N.ya',
+                  'p','q', 'S.max','D.sum','D.scale','sigma.R0',
+                  'S.eq.c', 'U.msy.c', 'S.msy.c', 'D', 'B.sum')
   
-  jmod <- rjags::jags.model(file='state_space_model/code/Taku_sockeye.txt', data=dat, n.chains=3, inits=inits, n.adapt=n.adapt.use) 
+  jmod <- rjags::jags.model(file='code/Speel_sockeye.txt', data=dat, n.chains=3, inits=inits, n.adapt=n.adapt.use) 
   stats::update(jmod, n.iter=n.iter.use, by=by.use, progress.bar='text', DIC=T, n.burnin=n.burnin.use) # this modifies the original object, function returns NULL
   post <- rjags::coda.samples(jmod, parameters, n.iter=n.iter.use, thin=thin.use, n.burnin=n.burnin.use)
 
@@ -109,6 +103,6 @@ end.jags <- proc.time()   # store time for MCMC
 post.arr <- as.array(post) # convert to an accessible obj
 
 # run the script that generates all the outputs 
-source("state_space_model/code/2_GENERATE_OUTPUTS.R")
+#source("state_space_model/code/2_GENERATE_OUTPUTS.R")
 }
 
