@@ -78,20 +78,17 @@ source("code/model_data.R")
 source("code/model_inits.R")
 
 # STEP 3: RUN THE MODEL AND PROCESS THE OUTPUT----
-# 2 options: rjags 
-
 # This step does the actual MCMC sampling. All subsequent steps
 
 # start the timer
-
 start.jags <- proc.time()
 #rjags
 if(package.use == "rjags" & sensitivity.analysis == 0){
   parameters <- c('alpha','beta', 'lnalpha','lnalpha.c','phi',
                   'sigma.R','log.resid.0', 'mean.log.R0','log.resid',
-                  'S','R','N','mu.hbelow','pi','h.below','N.ya',
-                  'p','q', 'S.max','D.sum','D.scale','sigma.R0',
-                  'S.eq.c', 'U.msy.c', 'S.msy.c', 'D', 'B.sum')
+                  'S','R','N','pi','h.b','N.ya',
+                  'p','q', 'S.max','D.sum','sigma.R0',
+                  'S.eq.c', 'U.msy.c', 'S.msy.c', 'B.sum')
   
   jmod <- rjags::jags.model(file='code/Speel_sockeye.txt', data=dat, n.chains=3, inits=inits, n.adapt=n.adapt.use) 
   stats::update(jmod, n.iter=n.iter.use, by=by.use, progress.bar='text', DIC=T, n.burnin=n.burnin.use) # this modifies the original object, function returns NULL
