@@ -180,8 +180,8 @@ stats %>%
             funs(str_replace(., "stats", "p"))) %>%
   dplyr::select(-c(variable))-> df
 new.df <- data.frame(
-  year = c(1977:2007, 1977:2007, 1977:2007),
-  age = rep(c("Ages 2-4", "Age 5", "Ages 6-8"), each =31))
+  year = c(1977:2015, 1977:2015, 1977:2015),
+  age = rep(c("Ages 2-4", "Age 5", "Ages 6-8"), each =39))
 p_data <- cbind(df, new.df)
 
 stats %>% 
@@ -192,8 +192,8 @@ stats %>%
             funs(str_replace(., "stats", "q"))) %>%
   dplyr::select(-c(variable))-> df
 new.df <- data.frame(
-  year = c(1983:2011, 1983:2011, 1983:2011),
-  age = rep(c("Ages 2-4", "Age 5", "Ages 6-8"), each = 29))
+  year = c(1983:2019, 1983:2019, 1983:2019),
+  age = rep(c("Ages 2-4", "Age 5", "Ages 6-8"), each = 37))
 q_data <- cbind(df, new.df)
 
 stats %>% 
@@ -218,7 +218,7 @@ quants %>%
             funs(str_replace(., "X", "h.b"))) %>%
   dplyr::select(-c(variable))-> df
 new.df <- data.frame(
-  year = rep(c(1983:2011),1))
+  year = rep(c(1983:2019),1))
 df1 <- cbind(df, new.df)
 
 quants %>%
@@ -256,7 +256,7 @@ quants %>%
             funs(str_replace(., "X", "log.resid"))) %>%
   dplyr::select(-c(variable))-> df
 new.df <- data.frame(
-  year = rep(c(1983:2007),1))
+  year = rep(c(1983:2015),1))
 df5 <- cbind(df, new.df)
 
 quants %>%
@@ -269,7 +269,7 @@ quants %>%
             funs(str_replace(., "X", "R"))) %>%
   dplyr::select(-c(variable))-> df
 new.df <- data.frame(
-  year = rep(c(1977:2007),1))
+  year = rep(c(1977:2015),1))
 df6 <- cbind(df, new.df)
 
 step1 <- merge(df1, df2, by=c("year"), all=TRUE)
