@@ -349,13 +349,10 @@ coda3 %>%
 coda<-rbind(coda1,coda2,coda3)
 coda %>% 
   mutate(Smsy = (1-lambert_W0(exp(1-lnalpha.c)))/beta,
-         Umsy = (1-lambert_W0(exp(1-lnalpha.c))),
-         Smsy80 = Smsy *0.80)  %>%
+         Umsy = (1-lambert_W0(exp(1-lnalpha.c)))) %>%
   as.data.frame() -> coda
 coda %>% 
   dplyr::select(Smsy) -> Smsy
-coda %>% 
-  dplyr::select(Smsy80) -> Smsy80
 coda %>% 
   dplyr::select(Umsy) -> Umsy
 

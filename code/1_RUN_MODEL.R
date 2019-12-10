@@ -100,6 +100,6 @@ end.jags <- proc.time()   # store time for MCMC
 post.arr <- as.array(post) # convert to an accessible obj
 
 # run the script that generates all the outputs 
-#source("state_space_model/code/2_GENERATE_OUTPUTS.R")
+source("code/2_GENERATE_OUTPUTS.R")
 }
 
