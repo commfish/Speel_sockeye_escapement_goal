@@ -87,7 +87,7 @@ if(package.use == "rjags" & sensitivity.analysis == 0){
   parameters <- c('alpha','beta', 'lnalpha','lnalpha.c','phi',
                   'sigma.R','log.resid.0', 'mean.log.R0','log.resid',
                   'S','R','N','pi','h.b','N.ya','mu.HB',
-                  'p','q', 'S.max','D','sigma.R0',
+                  'p','q', 'S.max','D.sum','sigma.R0',
                   'S.eq.c', 'U.msy.c', 'S.msy.c', 'B.sum')
   
   jmod <- rjags::jags.model(file='code/Speel_sockeye.txt', data=dat, n.chains=3, inits=inits, n.adapt=n.adapt.use) 
