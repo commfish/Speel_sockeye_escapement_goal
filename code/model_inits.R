@@ -51,10 +51,8 @@ g.inits = structure(.Data = c(
   1,1,1,
   1,1,1,
   1,1,1,
-  1,1,1,
-  1,1,1,
   1,1,1),
-  .Dim = c(31,3))
+  .Dim = c(29,3))
 
 
 inits1=list(

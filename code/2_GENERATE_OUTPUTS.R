@@ -14,15 +14,13 @@
 #Journal of Computational and Graphical Statistics 7: 434–455.
 loadfonts(device="win")
 windowsFonts(Times=windowsFont("Arial"))
-theme_set(theme_sleek())
 
-parameters <- c('S.eq.c','S.msy.c','U.msy.c','alpha','beta',
-                'lnalpha','lnalpha.c','phi','sigma.R','log.resid.0', 'mean.log.RO',
-                'S','R','N','log.resid','mu.hbelow','pi','h.below','N.ya',
-                'p','q', 'S.max','D.sum','D.scale','sigma.RO',
-                'S.eq.c2', 'U.msy.c2', 'S.msy.c2', 'U.max.c2', 'mu', 
-                'mu.habove', 'h.above', 'inriver.run','S.msy.c.80','S.msy.c2.80','mu.habove_wild',
-                'mu.hbelow_wild','lnRS')
+parameters <- c('alpha','beta', 'lnalpha','lnalpha.c','phi',
+                'sigma.R','log.resid.0', 'mean.log.R0','log.resid',
+                'S','R','N','pi','h.b','N.ya','mu.HB',
+                'p','q', 'S.max','D.sum','sigma.R0',
+                'S.eq.c', 'U.msy.c', 'S.msy.c', 'B.sum')
+
 # Numerical summary of each parameter (mean, median, quantiles of posteriers)----
 summary<-summary(post)  
 stats<-summary$statistics;  colnames(stats)
@@ -69,7 +67,7 @@ x  %>%
   dplyr::select(-variable1) %>%
   write.csv(., paste0(out.path,"/geweke.csv")) 
 
-pdf("state_space_model/output/rjags_Explore_BaseCase/geweke.pdf",height=10, width=8,onefile=T)
+pdf("output/rjags_base_case/geweke.pdf",height=10, width=8,onefile=T)
 geweke.plot(post)
 dev.off()
 
@@ -119,6 +117,11 @@ x <- post.arr[,parameters,]
 D.sum<-quantile(x, probs=c(0, 0.025, 0.05, 0.5, 0.95, 0.975, 1))
 D.sum <- data.frame(D.sum)
 
+parameters=c('B.sum')
+x <- post.arr[,parameters,]
+B.sum<-quantile(x, probs=c(0, 0.025, 0.05, 0.5, 0.95, 0.975, 1))
+B.sum <- data.frame(B.sum)
+
 parameters=c('pi[1]')
 x <- post.arr[,parameters,]
 pi<-quantile(x, probs=c(0, 0.025, 0.05, 0.5, 0.95, 0.975, 1))
@@ -142,15 +145,16 @@ step5 <- cbind(step4, sigma.R)
 step6 <- cbind(step5, S.eq.c)
 step7 <- cbind(step6, S.max)
 step8 <- cbind(step7, D.sum)
-step9 <- cbind(step8, pi1)
-step10 <- cbind(step9, pi2)
-step11 <- cbind(step10, pi3)
-step11 %>% 
+step9 <- cbind(step8, B.sum)
+step10 <- cbind(step9, pi1)
+step11 <- cbind(step10, pi2)
+step12 <- cbind(step11, pi3)
+step12 %>% 
   t()%>%
 write.csv(., file= paste0(out.path,"/percentiles.csv")) 
 
 # p_q_Nya.csv file----
-rawdat<-as.data.frame(read.csv("state_space_model/data/Taku_sockeye.csv",header=T) ) #get age_comp data
+rawdat<-as.data.frame(read.csv("data/Speel_sockeye.csv",header=T) ) #get age_comp data
 rawdat  %>% 
   dplyr::select (c(year, x4, x5, x6)) %>%
   mutate(age4 = x4/(x4+x5+x6),
@@ -176,8 +180,8 @@ stats %>%
             funs(str_replace(., "stats", "p"))) %>%
   dplyr::select(-c(variable))-> df
 new.df <- data.frame(
-  year = c(1974:2014, 1974:2014, 1974:2014),
-  age = rep(c("Ages 2-4", "Age 5", "Ages 6-8"), each = 41))
+  year = c(1977:2007, 1977:2007, 1977:2007),
+  age = rep(c("Ages 2-4", "Age 5", "Ages 6-8"), each =31))
 p_data <- cbind(df, new.df)
 
 stats %>% 
@@ -188,8 +192,8 @@ stats %>%
             funs(str_replace(., "stats", "q"))) %>%
   dplyr::select(-c(variable))-> df
 new.df <- data.frame(
-  year = c(1980:2018, 1980:2018, 1980:2018),
-  age = rep(c("Ages 2-4", "Age 5", "Ages 6-8"), each = 39))
+  year = c(1983:2011, 1983:2011, 1983:2011),
+  age = rep(c("Ages 2-4", "Age 5", "Ages 6-8"), each = 29))
 q_data <- cbind(df, new.df)
 
 stats %>% 
@@ -209,57 +213,20 @@ write.csv(p_q_Nya, file= paste0(out.path,"/p_q_Nya.csv"))
 data.frame(quants) %>% 
   rownames_to_column('variable') -> quants
 quants %>%
-  filter(str_detect(variable, "h.above")) %>% 
+  filter(str_detect(variable, "h.b")) %>% 
   rename_at(vars(starts_with("X")), 
-            funs(str_replace(., "X", "h.above"))) %>%
+            funs(str_replace(., "X", "h.b"))) %>%
   dplyr::select(-c(variable))-> df
 new.df <- data.frame(
-  year = rep(c(1980:2018),1))
+  year = rep(c(1983:2011),1))
 df1 <- cbind(df, new.df)
 
 quants %>%
-  filter(str_detect(variable, "h.below")) %>% 
+  filter(str_detect(variable, "mu.HB")) %>% 
   rename_at(vars(starts_with("X")), 
-            funs(str_replace(., "X", "h.below"))) %>%
+            funs(str_replace(., "X", "mu.HB"))) %>%
   dplyr::select(-c(variable))-> df
 df2 <- cbind(df, new.df)
-
-quants %>%
-  filter(str_detect(variable, "mu.hbelow_wild")) %>% 
-  rename_at(vars(starts_with("X")), 
-            funs(str_replace(., "X", "mu.hbelow_wild"))) %>%
-  dplyr::select(-c(variable))-> df
-df3 <- cbind(df, new.df)
-
-quants %>%
-  filter(str_detect(variable, "mu.habove_wild")) %>% 
-  rename_at(vars(starts_with("X")), 
-            funs(str_replace(., "X", "mu.habove_wild"))) %>%
-  dplyr::select(-c(variable))-> df
-df4 <- cbind(df, new.df)
-
-quants %>%
-  filter(str_detect(variable, "mu.hbelow")) %>% 
-  filter(!str_detect(variable, "mu.hbelow_wild")) %>%
-  rename_at(vars(starts_with("X")), 
-            funs(str_replace(., "X", "mu.hbelow"))) %>%
-  dplyr::select(-c(variable))-> df
-df5 <- cbind(df, new.df)
-
-quants %>%
-  filter(str_detect(variable, "mu.habove")) %>% 
-  filter(!str_detect(variable, "mu.habove_wild")) %>%
-  rename_at(vars(starts_with("X")), 
-            funs(str_replace(., "X", "mu.habove"))) %>%
-  dplyr::select(-c(variable))-> df
-df6 <- cbind(df, new.df)
-
-quants %>%
-  filter(str_detect(variable, "inriver.run")) %>% 
-  rename_at(vars(starts_with("X")), 
-            funs(str_replace(., "X", "inriver.run"))) %>%
-  dplyr::select(-c(variable))-> df
-df7 <- cbind(df, new.df)
 
 quants %>%
   filter(str_detect(variable, "S")) %>% 
@@ -268,13 +235,11 @@ quants %>%
   filter(!str_detect(variable, "S.max")) %>%
   filter(!str_detect(variable, "S.msy.c")) %>%
   filter(!str_detect(variable, "S.msy.c2")) %>%
-  filter(!str_detect(variable, "S.msy.c.80")) %>%
-  filter(!str_detect(variable, "S.msy.c2.80")) %>%
   filter(!str_detect(variable, "lnRS")) %>%
   rename_at(vars(starts_with("X")), 
             funs(str_replace(., "X", "S"))) %>%
   dplyr::select(-c(variable))-> df
-df8 <- cbind(df, new.df)
+df3 <- cbind(df, new.df)
 
 quants %>%
   filter(str_detect(variable, "N")) %>% 
@@ -282,7 +247,7 @@ quants %>%
   rename_at(vars(starts_with("X")), 
             funs(str_replace(., "X", "N"))) %>%
   dplyr::select(-c(variable))-> df
-df9 <- cbind(df, new.df)
+df4 <- cbind(df, new.df)
 
 quants %>%
   filter(str_detect(variable, "log.resid")) %>% 
@@ -291,12 +256,12 @@ quants %>%
             funs(str_replace(., "X", "log.resid"))) %>%
   dplyr::select(-c(variable))-> df
 new.df <- data.frame(
-  year = rep(c(1980:2014),1))
-df10 <- cbind(df, new.df)
+  year = rep(c(1983:2007),1))
+df5 <- cbind(df, new.df)
 
 quants %>%
   filter(str_detect(variable, "R")) %>%
-  filter(!str_detect(variable, "mean.log.RO")) %>%
+  filter(!str_detect(variable, "mean.log.R0")) %>%
   filter(!str_detect(variable, "sigma.R")) %>%
   filter(!str_detect(variable, "sigma.R0")) %>%
   filter(!str_detect(variable, "lnRS")) %>%
@@ -304,30 +269,15 @@ quants %>%
             funs(str_replace(., "X", "R"))) %>%
   dplyr::select(-c(variable))-> df
 new.df <- data.frame(
-  year = rep(c(1974:2014),1))
-df11 <- cbind(df, new.df)
-
-quants %>%
-  filter(str_detect(variable, "lnRS")) %>% 
-  rename_at(vars(starts_with("X")), 
-            funs(str_replace(., "X", "lnRS"))) %>%
-  dplyr::select(-c(variable))-> df
-new.df <- data.frame(
-  year = rep(c(1980:2018),1))
-df12 <- cbind(df, new.df)
+  year = rep(c(1977:2007),1))
+df6 <- cbind(df, new.df)
 
 step1 <- merge(df1, df2, by=c("year"), all=TRUE)
 step2 <- merge(step1, df3, by=c("year"), all=TRUE)
 step3 <- merge(step2, df4, by=c("year"), all=TRUE)
 step4 <- merge(step3, df5, by=c("year"), all=TRUE)
 step5 <- merge(step4, df6, by=c("year"), all=TRUE)
-step6 <- merge(step5, df7, by=c("year"), all=TRUE)
-step7 <- merge(step6, df8, by=c("year"), all=TRUE)
-step8 <- merge(step7, df9, by=c("year"), all=TRUE)
-step9 <- merge(step8, df10, by=c("year"), all=TRUE)
-step10 <- merge(step9, df11, by=c("year"), all=TRUE)
-step11 <- merge(step10, df12, by=c("year"), all=TRUE)
-write.csv(step11, file= paste0(out.path,"/parameters.csv")) 
+write.csv(step5, file= paste0(out.path,"/parameters.csv")) 
 
 # lambert calc----
 parameters=c("lnalpha", "beta", "lnalpha.c")
@@ -410,126 +360,45 @@ coda %>%
   dplyr::select(Umsy) -> Umsy
 
 # density plot
-for(lang.use in c("english","french")){
-  out.file <- paste0("state_space_model/output/rjags_Explore_BaseCase/density_",lang.use,".png")
-  ylab.use <- paste(rosettafish::trans("Density", from = "english", to = lang.use, 
-                                       custom_terms = terms.use, allow_missing = FALSE, "(R)"))
+out.file <- paste0("output/rjags_base_case/density.png")
 options(scipen=999)
 ggplot(Smsy, aes(x=Smsy, fill=Smsy, color = Smsy)) +
-  geom_density(fill ="#999999", alpha=0.5)+ annotate("text",x = 0, y=0.00004, label="a)", family="Arial" ,size=6) +
+  geom_density(fill ="#999999", alpha=0.5)+ annotate("text",x = 0, y=0.0006, label="a)", family="Arial" ,size=6) +
   scale_color_manual(values=c("#999999"))+
   scale_fill_manual(values=c("#999999"))+
   geom_vline(xintercept = 43857,linetype = "longdash" ) +
-  labs(x="Smsy",y=ylab.use) + theme_set(theme_bw(base_size=14,base_family=
+  labs(x="Smsy",y="Density") + theme_set(theme_bw(base_size=14,base_family=
                                              'Arial')+
                                     theme(panel.grid.major = element_blank(),
                                           panel.grid.minor = element_blank())) + theme(legend.position="none")+ 
  scale_x_continuous(labels = comma,breaks = seq(0, 150000, 25000), limits = c(0, 150000)) -> plot1
 
-ggplot(Smsy80, aes(x=Smsy80, fill=Smsy80)) +
-  geom_density(fill ="#999999", alpha=0.5)+ annotate("text",x = 0, y=0.00005, label="b)", family="Arial" ,size=6) +
-  scale_color_manual(values=c("#999999"))+geom_vline(xintercept = 35086,linetype = "longdash" ) +
-  scale_fill_manual(values=c("#999999"))+
-  labs(x="Smsy80",y=ylab.use) + theme_set(theme_bw(base_size=14,base_family=
-                                                    'Arial')+
-                                           theme(panel.grid.major = element_blank(),
-                                                 panel.grid.minor = element_blank())) +theme(legend.position="none")+ 
-  scale_x_continuous(labels = comma,breaks = seq(0, 150000, 25000), limits = c(0, 150000)) -> plot2
-
 ggplot(Umsy, aes(x=Umsy, fill=Umsy)) +
-  geom_density(fill ="#999999", alpha=0.5)+ annotate("text",x = 0, y=5, label="c)", family="Arial" ,size=6) +
+  geom_density(fill ="#999999", alpha=0.5)+ annotate("text",x = 0, y=5, label="b)", family="Arial" ,size=6) +
   scale_color_manual(values=c("#999999"))+
   scale_fill_manual(values=c("#999999"))+geom_vline(xintercept = 0.75,linetype = "longdash" ) +
-  labs(x="Umsy",y=ylab.use) + theme_set(theme_bw(base_size=14,base_family=
+  labs(x="Umsy",y="Density") + theme_set(theme_bw(base_size=14,base_family=
                                                       'Arial')+
                                              theme(panel.grid.major = element_blank(),
                                                    panel.grid.minor = element_blank())) + theme(legend.position="none")+ 
-  scale_x_continuous(breaks = seq(0, 1, 0.25), limits = c(0, 1)) -> plot3
+  scale_x_continuous(breaks = seq(0, 1, 0.25), limits = c(0, 1)) -> plot2
 
-cowplot::plot_grid(plot1,plot2,plot3,  align = "v", nrow = 3, ncol=1) 
-ggsave(out.file, dpi = 500, height = 8, width = 9, units = "in")}
-
-#combine statsquants and lambert datafile----
-#stats<-as.data.frame(read.csv(file=paste0(out.path, "/statsquants.csv"),header=T))
-#stats %>%
-#  rename(perc_2.5 = names(.)[6],
-#          perc_50 = names(.)[7],
-#          perc_97.5 = names(.)[8]) -> stats
-#lambert<-as.data.frame(read.csv(file=paste0(out.path, "/quantiles_lambert.csv"),header=T))
-#rbind(stats, lambert)-> x
-#write.csv(x, file= paste0(out.path,"/stats.csv") ,row.names=FALSE)  
+cowplot::plot_grid(plot1,plot2,  align = "v", nrow = 2, ncol=1) 
+ggsave(out.file, dpi = 500, height = 6, width = 8, units = "in")
 
 #trace and density plots----
 parameters <- c('alpha', 'lnalpha', 'lnalpha.c','beta','phi','sigma.R','S.eq.c','S.max','D.sum', 'pi')
-png("state_space_model/output/rjags_Explore_BaseCase/density_other.png",res=500, width=8, height=9, units ="in")
+png("output/rjags_base_case/density_other.png",res=500, width=8, height=9, units ="in")
 denplot(post, parms = c(parameters), style="plain", greek=TRUE, col="gray30", collapse =T)
 dev.off()
 dev.off()
 
-parameters <- c('S')
-pdf("state_space_model/output/rjags_Explore_BaseCase/density2.pdf",height=10, width=8,onefile=F)
-denplot(post, parms = c(parameters))
-dev.off()
-pdf("state_space_model/output/rjags_Explore_BaseCase/trace2.pdf",height=10, width=8,onefile=F)
-traplot(post, parms = c(parameters))
-dev.off()
-parameters <- c('R')
-pdf("state_space_model/output/rjags_Explore_BaseCase/density3.pdf",height=10, width=8,onefile=F)
-denplot(post, parms = c(parameters))
-dev.off()
-pdf("state_space_model/output/rjags_Explore_BaseCase/trace3.pdf",height=10, width=8,onefile=F)
-traplot(post, parms = c(parameters))
-dev.off()
-parameters <- c('N')
-pdf("state_space_model/output/rjags_Explore_BaseCase/density4.pdf",height=10, width=8,onefile=F)
-denplot(post, parms = c(parameters))
-dev.off()
-pdf("state_space_model/output/rjags_Explore_BaseCase/trace4.pdf",height=10, width=8,onefile=F)
-traplot(post, parms = c(parameters))
-dev.off()
-parameters <- c('p')
-pdf("state_space_model/output/rjags_Explore_BaseCase/density5.pdf",height=10, width=8,onefile=F)
-denplot(post, parms = c(parameters))
-dev.off()
-pdf("state_space_model/output/rjags_Explore_BaseCase/trace5.pdf",height=10, width=8,onefile=F)
-traplot(post, parms = c(parameters))
-dev.off()
-parameters <- c('q')
-pdf("state_space_model/output/rjags_Explore_BaseCase/density6.pdf",height=10, width=8,onefile=F)
-denplot(post, parms = c(parameters))
-dev.off()
-pdf("state_space_model/output/rjags_Explore_BaseCase/trace6.pdf",height=10, width=8,onefile=F)
-traplot(post, parms = c(parameters))
-dev.off()
-
 # autocorrelation plots----
 windows(record=T)
-pdf("state_space_model/output/rjags_Explore_BaseCase/autocorr.pdf",height=6, width=8,onefile=T,useDingbats=F)
+pdf("output/rjags_base_case/autocorr.pdf",height=6, width=8,onefile=T,useDingbats=F)
 autocorr.plot(post, lag.max=5)
 dev.off()
 dev.off()
 autocorr.summary<-autocorr.diag(post)
 autocorr.summary<-data.frame(autocorr.summary)
 write.csv(autocorr.summary, file= paste0(out.path,"/autocorr.csv")) 
-
-#density and time series plots----
-post.samp <- post
-nvars <- dim(post.samp[[1]])[2]
-nsamps <- dim(post.samp[[1]])[1]
-int <- 25
-pdf("state_space_model/output/rjags_Explore_BaseCase/profiles.pdf",height=6, width=8)
-for(j in seq(1,nvars,int)){
-  par(mfrow=c(5,4),mai=c(0.3,0.3,0.2,0.2))
-  for(i in 0:(int-1)){
-    mindat=min(c(post.samp[[1]][,i+j],post.samp[[1]][,i+j]))
-    maxdat=max(c(post.samp[[1]][,i+j],post.samp[[1]][,i+j]))
-    plot(density(post.samp[[1]][,i+j]),col='blue',main=colnames(post.samp[[1]])[i+j],xlim=c(mindat,maxdat))
-    lines(density(post.samp[[2]][,i+j]),col='red')
-    lines(density(post.samp[[3]][,i+j]),col='green')
-    
-    plot(as.numeric(post.samp[[1]][,i+j]),col='blue',main=colnames(post.samp[[1]])[i+j],ylim=c(mindat,maxdat),type='l')
-    lines(as.numeric(post.samp[[2]][,i+j]),col='red')
-    lines(density(post.samp[[3]][,i+j]),col='green')
-  }}
-dev.off()
-dev.off()
