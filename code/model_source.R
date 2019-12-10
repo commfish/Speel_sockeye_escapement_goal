@@ -54,7 +54,7 @@ mod=function() {
   #GENERATE Y+A-1 = 42 MATURITY SCHEDULES, ONE PER BROOD YEAR USING THE DIRICHLET DISTRIB. (Eq.4-6)
   # "pi" (central tendency of "p"), and "D.scale" (dispersion of "p")
   D.scale ~ dunif(0,1)#uninformative
-  D.sum <- 1 / (D.scale * D.scale)
+  D <- 1 / (D.scale * D.scale)
   pi.2p ~ dbeta(1,1)#uninformative
   pi.1 ~ dbeta(1,1)#uninformative; Eq.6
   pi[1] <- pi.1
@@ -62,7 +62,7 @@ mod=function() {
   pi[3] <- 1 - pi[1] - pi[2]
   
   for (a in 1:A) {
-    gamma[a] <- D.sum * pi[a]
+    gamma[a] <- D * pi[a]
     for (y in 1:(Y+A-1)) {                                                    
       g[y,a] ~ dgamma(gamma[a],0.01)
       p[y,a] <- g[y,a]/sum(g[y,])
