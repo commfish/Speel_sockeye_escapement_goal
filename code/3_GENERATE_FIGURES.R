@@ -1,35 +1,15 @@
-# THIS SCRIPT IS RUN AFTER 1_RUN_MODELS.R and 2b_GENERATE_OUTPUTS.r
+# THIS SCRIPT IS RUN AFTER 1_RUN_MODELS.R and 2_GENERATE_OUTPUTS.r
 # i and z act as ways to change range of escapement based on stock size
 
 # input values below based on stats output
-LowerB <- 49500  #lower bound of recommended escapement goal range
-UpperB <- 55700 #upper bound of recommended escapement goal range
-SMSY <- 43857  #Lambert W from lambert file
-UMSY <- 0.75  #median from staquants file
-SMAX <- 59145  #median from staquants file
-SEQ <- 124106 #median from staquants file
-lnalpha.c <-  2.1115 #median from staquants file
-beta <-1.69076E-05  #median from staquants file
-SGEN<-5873
-
-theme_sleek <- function(base_size = 12, base_family = "Arial") {
-  half_line <- base_size/2
-  theme_light(base_size = 12, base_family = "Arial") +
-    theme(
-      panel.grid.major = element_blank(),
-      panel.grid.minor = element_blank(),
-      axis.ticks.length = unit(half_line / 2.2, "pt"),
-      strip.background = element_rect(fill = NA, colour = NA),
-      strip.text.x = element_text(colour = "black"),
-      strip.text.y = element_text(colour = "black"),
-      panel.border = element_rect(fill = NA),
-      legend.key.size = unit(0.9, "lines"),
-      legend.key = element_rect(colour = NA, fill = NA),
-      legend.background = element_rect(colour = NA, fill = NA)
-    )
-}
-
-theme_set(theme_sleek())
+LowerB <- 3000  #lower bound of recommended escapement goal range
+UpperB <- 7000 #upper bound of recommended escapement goal range
+SMSY <- 4800  #Lambert W from lambert file
+UMSY <- 0.62  #median from staquants file
+SMAX <- 7574  #median from staquants file
+SEQ <- 12557 #median from staquants file
+lnalpha.c <-  1.51 #median from staquants file
+beta <- 0.00013  #median from staquants file
 
 # load----
 library(tidyverse)
@@ -42,27 +22,16 @@ library(scales)
 library(dplyr)
 library(extrafont)
 library("devtools")
-devtools::install_github("pbs-assess/rosettafish")
-library(rosettafish)
 # font_import()
 
-# read in the custom dictionary (english to french translation)
-terms.use <- read.csv("state_space_model/data/translation_terms.csv",stringsAsFactors = FALSE)
-
-# test the translation function
-rosettafish::trans("Overfishing Profile", from = "english", to = "french", 
-                   custom_terms = terms.use, allow_missing = FALSE)
-
-
 windowsFonts(Times=windowsFont("TT Arial"))
-theme_set(theme_sleek())
-source('state_space_model/code/functions.r')
+source('code/functions.r')
 
-if(!dir.exists(file.path("state_space_model", "output", "rjags_Explore_Basecase", "processed"))){dir.create(file.path("state_space_model", "output", "rjags_Explore_Basecase", "processed"))}
+if(!dir.exists(file.path("output", "rjags_base_case", "processed"))){dir.create(file.path("output", "rjags_base_case", "processed"))}
 
 # data----
 # loadfonts(device="win") #only need to do this once; takes awhile to run!
-coda <- read.csv("state_space_model/output/rjags_Explore_Basecase/coda.csv") 
+coda <- read.csv("output/rjags_base_case/coda.csv") 
 coda  %>%
   mutate(S.eq.c = lnalpha.c/beta, 
                 S.msy.c = (1-lambert_W0(exp(1-lnalpha.c)))/beta, #Lambert W
@@ -70,177 +39,101 @@ coda  %>%
 					      MSY.c = R.msy.c-S.msy.c, 
 					      Rmax = exp(lnalpha)*(1/beta)*exp(-1)) -> coda
 
-
 # analysis----
 # create function for probability profiles and figures
+theme_sleek <- function(base_size = 12, base_family = "Arial") {
+  theme_light(base_size = 12, base_family = "Arial") +theme_bw()+
+    theme(
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(),
+      panel.border = element_rect(fill = NA),
+      legend.key = element_rect(colour = NA, fill = NA),
+      legend.background = element_rect(colour = NA, fill = NA)
+    )
+}
+theme_set(theme_sleek())
+
 profile(i=10, z=50, xa.start=0, xa.end=8000,lnalpha.c, beta) #can change i,z, xa.start, xa.end
 
-parameters <- read.csv("state_space_model/output/rjags_Explore_BaseCase/parameters.csv") 
-Taku_sockeye <- read.csv("state_space_model/data/Taku_sockeye.csv") 
-ir <- read.csv("state_space_model/data/ir.csv") 
-p_q_Nya<- read.csv("state_space_model/output/rjags_Explore_BaseCase/p_q_Nya.csv") 
-QM <- read.csv("state_space_model/output/rjags_Explore_BaseCase/processed/QM.csv")
-CI<- read.csv("state_space_model/output/rjags_Explore_BaseCase/processed/CI.csv")
-coda <- read.csv("state_space_model/output/rjags_Explore_BaseCase/coda.csv") 
-parameters <- read.csv("state_space_model/output/rjags_Explore_BaseCase/parameters.csv") 
-terminalrun <- read.csv("state_space_model/data/adjusted_historic.csv") #terminal run abundance from the 2018 C & E tables 
-pubestimates <- read.csv("state_space_model/data/pubestimates.csv") 
-pubestimates_expanded <- read.csv("state_space_model/data/pubestimates_expanded.csv") 
+# read in data
+Speel_sockeye <- read.csv("data/Speel_sockeye.csv") 
+p_q_Nya<- read.csv("output/rjags_base_case/p_q_Nya.csv") 
+QM <- read.csv("output/rjags_base_case/processed/QM.csv")
+CI<- read.csv("output/rjags_base_case/processed/CI.csv")
+coda <- read.csv("output/rjags_base_case/coda.csv") 
+parameters <- read.csv("output/rjags_base_case/parameters.csv") 
 
 # escapement, returns, run abundance, and residuals by year
 parameters %>%
-  mutate (inriver.run97.5. = as.numeric(inriver.run97.5.),
-  inriver.run50. = as.numeric(inriver.run50.),
-  year = as.numeric(year),
-  S97.5. =as.numeric(S97.5.),
-  S50. =as.numeric(S50.)) -> parameters
-maxY<-max(parameters$inriver.run97.5., na.rm=TRUE)*1.5
-data <- merge(parameters, Taku_sockeye, by=c("year"), all=TRUE)
-data <- merge(data, ir, by=c("year"), all=TRUE)
+  mutate (year = as.numeric(year),
+  S97.5. = as.numeric(S97.5.),
+  S50. = as.numeric(S50.)) -> parameters
+data <- merge(parameters, Speel_sockeye, by=c("year"), all=TRUE)
 xaxis = tickr(data, year, 4)
 
 # POINT ESTIMATES----
-for(lang.use in c("english","french")){
-  out.file <- paste0("state_space_model/output/rjags_Explore_BaseCase/processed/point_est_",lang.use,".png")
-  ylab.use <- paste(rosettafish::trans("Inriver Run", from = "english", to = lang.use, 
-                                       custom_terms = terms.use, allow_missing = FALSE))
-# inriver run   
-ggplot(data, aes(x=year, y=(inriver.run50.))) +
-  geom_line(size=0.75)+ geom_point(size=2)+ylab(ylab.use)+xlab("") +
-  geom_ribbon(aes(ymin=(inriver.run2.5.), ymax=(inriver.run97.5.)), alpha=0.20) +
-  scale_y_continuous(labels = comma,breaks = seq(0, 250000, 50000), limits = c(0, 250000)) +
-  scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels) +
-  annotate("text",x = 1974, y=250000, label="a)", family="Arial" ,size=6) +
-  theme(legend.position = "none") + geom_point(aes(x=year, y=ir), pch=8, size=3,colour="grey40") -> plot1 
+out.file <- paste0("output/rjags_base_case/processed/point_est.png")
 
 # escapement
-ylab.use <- paste(rosettafish::trans("Spawners", from = "english", to = lang.use, 
-                                     custom_terms = terms.use, allow_missing = FALSE),"(S)")
 maxY<-max(parameters$S97.5., na.rm=TRUE)*1.5
 ggplot(parameters, aes(x=year, y=(S50.))) +
-  geom_line(size=0.75)+ geom_point (size=2)+ylab(ylab.use) + xlab("") +
+  geom_line(size=0.75)+ geom_point (size=2)+ylab("Escapement (S)") + xlab("") +
   geom_ribbon(aes(ymin=(parameters$S2.5.), ymax=(parameters$S97.5.)), alpha=0.20) +
-  scale_y_continuous(labels = comma,breaks = seq(0, 150000, 50000), limits = c(0, 150000)) +
+  scale_y_continuous(labels = comma,breaks = seq(0, 20000, 5000), limits = c(0, 20000)) +
   scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels) +
   theme(legend.position = "none") +
   geom_line(aes(y=SMSY), colour="grey40", size=1, linetype=2)+
-  annotate("text",x = 1974, y=150000, label="b)", family="Arial" ,size=6) +
-  geom_line(aes(y=SGEN), colour="grey40", size=1, linetype=3)-> plot2
+  annotate("text",x = 1977, y= 20000, label="(a)", family="Arial" ,size=6) -> plot1
 
 # terminal run abundance   
-xlab.use <- paste(rosettafish::trans("Year", from = "english", to = lang.use, 
-                                     custom_terms = terms.use, allow_missing = FALSE))
-
-ylab.use <- paste(rosettafish::trans("Terminal Run Abundance", from = "english", to = lang.use, 
-                                     custom_terms = terms.use, allow_missing = FALSE),"(N)")
 maxY<-max(parameters$N97.5., na.rm=TRUE)*1.5
 ggplot(parameters, aes(x=year, y=N50.))+geom_line(size=0.75) + 
-  geom_point (size=2) + xlab(xlab.use) +
-  ylab(ylab.use) +annotate("text",x = 1974, y=400000, label="c)", family="Arial" ,size=6) +
+  geom_point (size=2) + xlab("Year") +
+  ylab("Terminal Run Abundance (N)") +annotate("text",x = 1977, y = 40000, label="(c)", family="Arial" ,size=6) +
   geom_ribbon(aes(ymin=N2.5., ymax=N97.5.), alpha=0.20) +
-  scale_y_continuous(labels = comma,breaks = seq(0, 400000, 100000), limits = c(0, 400000)) +
+  scale_y_continuous(labels = comma,breaks = seq(0, 40000, 5000), limits = c(0, 40000)) +
   scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels) +
-  theme(legend.position = "none") -> plot3
-cowplot::plot_grid(plot1,plot2, plot3,  align = "v", nrow = 3, ncol=1) 
-ggsave(out.file, dpi = 500, height = 8, width = 9, units = "in")}
+  theme(legend.position = "none") -> plot2
 
-# POINT ESTIMATES RECRUITS----
-for(lang.use in c("english","french")){
-  out.file <- paste0("state_space_model/output/rjags_Explore_BaseCase/processed/point_est_rec_",lang.use,".png")
-  ylab.use <- paste(rosettafish::trans("Returns", from = "english", to = lang.use, 
-                                       custom_terms = terms.use, allow_missing = FALSE, "(R)"))
+# harvest rates
+ggplot(parameters, aes(x=year, y=mu.HB50.))+geom_line(size=0.75)+geom_point (size=2)+ ylab("Harvest rate") +
+  xlab("") +
+  geom_ribbon(aes(ymin=mu.HB2.5., ymax=mu.HB97.5.), alpha=0.15) +
+  coord_cartesian(ylim=c(0,1)) + annotate("text",x = 1977, y=1.00, label="(b)", family="Arial", size=6) +
+  scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels) +
+  geom_line(aes(y=UMSY), colour="grey70", size=1, linetype=2) + theme(legend.position = "none") -> plot3
+
+cowplot::plot_grid(plot1,plot3, plot2,  align = "v", nrow = 3, ncol=1) 
+ggsave(out.file, dpi = 500, height = 8, width = 9, units = "in")
+
+# RETURNS----
 # returns
+out.file <- paste0("output/rjags_base_case/processed/returns_est.png")
 maxY<-max(parameters$R97.5., na.rm=TRUE)*1.5
 ggplot(parameters, aes(x=year, y=(R50.))) + geom_line(size=0.75) + 
-  geom_point(size=2)+ylab(ylab.use) + xlab("") + annotate("text",x = 1974, y=400000, label="a)", family="Arial" ,size=6) +
+  geom_point(size=2)+ylab("Returns (R)") + xlab("") + annotate("text",x = 1977, y= 40000, label="(a)", family="Arial" ,size=6) +
   geom_ribbon(aes(ymin=R2.5., ymax=R97.5.), alpha=0.20) +
-  scale_y_continuous(labels = comma,breaks = seq(0, 400000, 100000), limits = c(0, 400000)) +
+  scale_y_continuous(labels = comma,breaks = seq(0, 40000, 5000), limits = c(0, 40000)) +
   scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels) +
   theme(legend.position = "none") -> plot1
 
 # Ricker productivity residuals
 maxY<-max(parameters$log.resid97.5., na.rm=TRUE)+0.5
 minY<-min(parameters$log.resid2.5., na.rm=TRUE)-0.5
-ylab.use <- paste(rosettafish::trans("Productivity Residuals", from = "english", to = lang.use, 
-                                     custom_terms = terms.use, allow_missing = FALSE, "(R)"))
-xlab.use <- paste(rosettafish::trans("Brood Year", from = "english", to = lang.use, 
-                                     custom_terms = terms.use, allow_missing = FALSE, "(R)"))
 ggplot(parameters, aes(x=year, y=log.resid50.))+geom_line(size=0.75)+geom_point (size=2) + 
-  ylab(ylab.use)+xlab(xlab.use) + annotate("text",x = 1974, y=1.00, label="b)", family="Arial" ,size=6) +
+  ylab("Productivity Residuals")+xlab("Brood Year") + annotate("text",x = 1977, y=1.00, label="(b)", family="Arial" ,size=6) +
   geom_ribbon(aes(ymin=parameters$log.resid2.5., ymax=parameters$log.resid97.5.), alpha=0.20) +
   geom_line(aes(y=0), colour="black", size=0.5) +
   scale_y_continuous(breaks = seq(-1, 1, 0.25), limits = c(-1, 1)) +
   scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels) +
   theme(legend.position = "none") -> plot2
 cowplot::plot_grid(plot1,plot2,  align = "v", nrow = 2, ncol=1) 
-ggsave(out.file, dpi = 500, height = 8, width = 9, units = "in")}
+ggsave(out.file, dpi = 500, height = 8, width = 9, units = "in")
 
-# HARVEST RATES WILD (english)----
-for(lang.use in c("english")){
-  out.file <- paste0("state_space_model/output/rjags_Explore_BaseCase/processed/harvest_rates_wild_",lang.use,".png")
-  ylab.use <- paste(rosettafish::trans("Naturally Spawned Harvest Rate", from = "english", to = lang.use, 
-                                       custom_terms = terms.use, allow_missing = FALSE))
-  label.use <-paste(rosettafish::trans("a) Below Border", from = "english", to = lang.use, 
-                                       custom_terms = terms.use, allow_missing = FALSE))
-ggplot(parameters, aes(x=year, y=mu.hbelow50.))+geom_line(size=0.75)+geom_point (size=2)+ ylab(ylab.use) +
-  xlab("") +
-  geom_ribbon(aes(ymin=mu.hbelow_wild2.5., ymax=mu.hbelow_wild97.5.), alpha=0.15) +
-  coord_cartesian(ylim=c(0,1)) + annotate("text",x = 1978, y=1.00, label=label.use, family="Arial", size=6) +
-  scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels) +
-  geom_line(aes(y=UMSY), colour="grey70", size=1, linetype=2) + theme(legend.position = "none") -> plot1
-
-ylab.use <- paste(rosettafish::trans("Naturally Spawned Harvest Rate", from = "english", to = lang.use, 
-                                     custom_terms = terms.use, allow_missing = FALSE))
-xlab.use <- paste(rosettafish::trans("Year", from = "english", to = lang.use, 
-                                     custom_terms = terms.use, allow_missing = FALSE))
-label.use <-paste(rosettafish::trans("b) Above Border", from = "english", to = lang.use, 
-                                     custom_terms = terms.use, allow_missing = FALSE))
-ggplot(parameters, aes(x=year, y=mu.habove_wild50.))+geom_line(size=0.75)+geom_point (size=2)+ ylab(ylab.use) +
-  xlab(xlab.use) +  annotate("text",x = 1978, y=1.00, label=label.use, family="Arial" ,size=6) +
-  geom_ribbon(aes(ymin=mu.habove_wild2.5., ymax=mu.habove_wild97.5.), alpha=0.15) +
-  coord_cartesian(ylim=c(0,1)) +
-  scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels) +
-  geom_line(aes(y=UMSY), colour="grey70", size=1, linetype=2) + theme(legend.position = "none") -> plot2
-
-cowplot::plot_grid(plot1,plot2,  align = "v", nrow = 2, ncol=1) 
-ggsave(out.file, dpi = 500, height = 8, width = 9, units = "in")}
-
-# HARVEST RATES WILD (french)----
-for(lang.use in c("french")){
-  out.file <- paste0("state_space_model/output/rjags_Explore_BaseCase/processed/harvest_wild_",lang.use,".png")
-  ylab.use <- paste(rosettafish::trans("Naturally Spawned Harvest Rate", from = "english", to = lang.use, 
-                                       custom_terms = terms.use, allow_missing = FALSE))
-  label.use <-paste(rosettafish::trans("a) Below Border", from = "english", to = lang.use, 
-                                       custom_terms = terms.use, allow_missing = FALSE))
-  ggplot(parameters, aes(x=year, y=mu.hbelow50.))+geom_line(size=0.75)+geom_point (size=2)+ ylab(ylab.use) +
-    xlab("") +
-    geom_ribbon(aes(ymin=mu.hbelow_wild2.5., ymax=mu.hbelow_wild97.5.), alpha=0.15) +
-    coord_cartesian(ylim=c(0,1)) + annotate("text",x = 1981.4, y=1.00, label=label.use, family="Arial", size=6) +
-    scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels) +
-    geom_line(aes(y=UMSY), colour="grey70", size=1, linetype=2) + theme(legend.position = "none") -> plot1
-  
-  ylab.use <- paste(rosettafish::trans("Naturally Spawned Harvest Rate", from = "english", to = lang.use, 
-                                       custom_terms = terms.use, allow_missing = FALSE))
-  xlab.use <- paste(rosettafish::trans("Year", from = "english", to = lang.use, 
-                                       custom_terms = terms.use, allow_missing = FALSE))
-  label.use <-paste(rosettafish::trans("b) Above Border", from = "english", to = lang.use, 
-                                       custom_terms = terms.use, allow_missing = FALSE))
-  ggplot(parameters, aes(x=year, y=mu.habove_wild50.))+geom_line(size=0.75)+geom_point (size=2)+ ylab(ylab.use) +
-    xlab(xlab.use) +  annotate("text",x = 1981, y=1.00, label=label.use, family="Arial" ,size=6) +
-    geom_ribbon(aes(ymin=mu.habove_wild2.5., ymax=mu.habove_wild97.5.), alpha=0.15) +
-    coord_cartesian(ylim=c(0,1)) +
-    scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels) +
-    geom_line(aes(y=UMSY), colour="grey70", size=1, linetype=2) + theme(legend.position = "none") -> plot2
-  
-  cowplot::plot_grid(plot1,plot2,  align = "v", nrow = 2, ncol=1) 
-  ggsave(out.file, dpi = 500, height = 8, width = 9, units = "in")}
-
-# PROPORTIONS (english)----
-for(lang.use in c("english")){
-  out.file <- paste0("state_space_model/output/rjags_Explore_BaseCase/processed/props_",lang.use,".png")
-  ylab.use <- paste(rosettafish::trans("Age-at-Maturity Proportions", from = "english", to = lang.use, 
-                                       custom_terms = terms.use, allow_missing = FALSE))
+# PROPORTIONS----
 # mean age at maturity (p), age composition (q), terminal run by age proportions (Nya)
+out.file <- paste0("output/rjags_base_case/processed/props.png")
+
 p_q_Nya %>%
   mutate(age_comp = as.numeric(age_comp),
           year = as.numeric(year),
@@ -252,74 +145,26 @@ p_q_Nya %>%
 ggplot(data,aes(x=year, y=p, fill=as.factor(Age))) +
   geom_area(position=position_stack(reverse=TRUE)) + scale_fill_grey(start=0.1, end=0.8) +
   theme(legend.title=element_blank(),legend.position=c(0.90,0.86)) +
-  ylab(ylab.use) + xlab("") + annotate("text",x = 1974, y=1.00, label= "a)", family="Arial" ,size=6) +
-  scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels, limits = c(1974, 2020)) -> plot1  
+  ylab("Age-at-Maturity Proportions") + xlab("") + annotate("text",x = 1977, y=1.00, label= "(a)", family="Arial" ,size=6) +
+  scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels, limits = c(1977, 2022)) -> plot1  
 
-ylab.use <- paste(rosettafish::trans("Age Composition Proportions", from = "english", to = lang.use, 
-                                     custom_terms = terms.use, allow_missing = FALSE))
 ggplot(data,aes(x=year, y=q, fill=as.factor(Age))) +
   geom_area(position=position_stack(reverse=FALSE)) +
-  scale_fill_grey(start=0.1, end=0.8) + annotate("text",x = 1974, y=1.00, label="b)", family="Arial" ,size=6) +
-  ylab(ylab.use) + xlab("") +
+  scale_fill_grey(start=0.1, end=0.8) + annotate("text",x = 1977, y=1.00, label="(b)", family="Arial" ,size=6) +
+  ylab("Age Composition Proportions") + xlab("") +
   theme(legend.title=element_blank(), legend.position="none") + geom_point(aes(x=year, y=age_comp), position='stack') +
-  scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels, limits = c(1974, 2020)) -> plot2
+  scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels, limits = c(1977, 2022)) -> plot2
 
-ylab.use <- paste(rosettafish::trans("Terminal Run by Age", from = "english", to = lang.use, 
-                                     custom_terms = terms.use, allow_missing = FALSE))
-xlab.use <- paste(rosettafish::trans("Year", from = "english", to = lang.use, 
-                                     custom_terms = terms.use, allow_missing = FALSE))
 ggplot(data,aes(x=year, y=Nya, fill=as.factor(Age))) +
   geom_area(position=position_stack(reverse=TRUE)) + scale_fill_grey(start=0.1, end=0.8) +
-  ylab(ylab.use)+xlab(xlab.use) + annotate("text",x = 1974, y=350000, label="c)", family="Arial" ,size=6) +
+  ylab("Terminal Run by Age")+xlab("Year") + annotate("text",x = 1977, y=30000, label="(c)", family="Arial" ,size=6) +
   guides(fill = guide_legend(reverse=FALSE)) + 
   theme(legend.title=element_blank(), legend.position="none") +
-  scale_y_continuous(labels = comma,breaks = seq(0, 350000, 50000), limits = c(0, 350000)) +
-  scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels, limits = c(1974, 2020)) -> plot3
+  scale_y_continuous(labels = comma,breaks = seq(0, 30000, 5000), limits = c(0, 30000)) +
+  scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels, limits = c(1977, 2022)) -> plot3
 cowplot::plot_grid(plot1,plot2,plot3, align = "v", nrow = 3, ncol=1) 
-ggsave(out.file, dpi = 500, height = 11, width = 8, units = "in")}
+ggsave(out.file, dpi = 500, height = 11, width = 8, units = "in")
 
-# PROPORTIONS (french)----
-for(lang.use in c("french")){
-  out.file <- paste0("state_space_model/output/rjags_Explore_BaseCase/processed/props_",lang.use,".png")
-  ylab.use <- paste(rosettafish::trans("Age-at-Maturity Proportions", from = "english", to = lang.use, 
-                                       custom_terms = terms.use, allow_missing = FALSE))
-  # mean age at maturity (p), age composition (q), terminal run by age proportions (Nya)
-  p_q_Nya %>%
-    mutate(age_comp = as.numeric(age_comp),
-           year = as.numeric(year),
-           Age = factor(age, ordered = TRUE, 
-                        levels = c( "Ages 2-4", "Age 5", "Ages 6-8"),
-                        labels = c("Âges 2-4", "Âge 5", "Âges 6-8"))) %>%
-    mutate(age_comp = ifelse(Age == 'Âges 2-4', NA, age_comp))-> data
-  
-  ggplot(data,aes(x=year, y=p, fill=as.factor(Age))) +
-    geom_area(position=position_stack(reverse=TRUE)) + scale_fill_grey(start=0.1, end=0.8) +
-    theme(legend.title=element_blank(), legend.position=c(0.90,0.86)) +
-    ylab(ylab.use) + xlab("") + annotate("text",x = 1974, y=1.00, label= "a)", family="Arial" ,size=6) +
-    scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels, limits = c(1974, 2020)) -> plot1  
-  
-  ylab.use <- paste(rosettafish::trans("Age Composition Proportions", from = "english", to = lang.use, 
-                                       custom_terms = terms.use, allow_missing = FALSE))
-  ggplot(data,aes(x=year, y=q, fill=as.factor(Age))) +
-    geom_area(position=position_stack(reverse=FALSE)) +
-    scale_fill_grey(start=0.1, end=0.8) + annotate("text",x = 1974, y=1.00, label="b)", family="Arial" ,size=6) +
-    ylab(ylab.use) + xlab("") +
-    theme(legend.title=element_blank(), legend.position="none")  + geom_point(aes(x=year, y=age_comp), position='stack') +
-    scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels, limits = c(1974, 2020)) -> plot2
-  
-  ylab.use <- paste(rosettafish::trans("Terminal Run by Age", from = "english", to = lang.use, 
-                                       custom_terms = terms.use, allow_missing = FALSE))
-  xlab.use <- paste(rosettafish::trans("Year", from = "english", to = lang.use, 
-                                       custom_terms = terms.use, allow_missing = FALSE))
-  ggplot(data,aes(x=year, y=Nya, fill=as.factor(Age))) +
-    geom_area(position=position_stack(reverse=TRUE)) + scale_fill_grey(start=0.1, end=0.8) +
-    ylab(ylab.use)+xlab(xlab.use) + annotate("text",x = 1974, y=350000, label="c)", family="Arial" ,size=6) +
-    guides(fill = guide_legend(reverse=FALSE)) + 
-    theme(legend.title=element_blank(), legend.position="none") + 
-    scale_y_continuous(labels = comma,breaks = seq(0, 350000, 50000), limits = c(0, 350000)) +
-    scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels, limits = c(1974, 2020)) -> plot3
-  cowplot::plot_grid(plot1,plot2,plot3, align = "v", nrow = 3, ncol=1) 
-  ggsave(out.file, dpi = 500, height = 11, width = 8, units = "in")}
 
 # HORSETAIL PLOTS----
 num <- nrow(QM)
@@ -347,7 +192,7 @@ QM %>%
          S97.5. = 0) -> dataset
 
 parameters %>%
-  filter (year %in% c(1980:2014)) %>%
+  filter (year %in% c(1983:2015)) %>%
   dplyr::select(c(year, S50., R50., R2.5., R97.5., S2.5., S97.5.)) %>%
   mutate(lnalpha.c = 'NA',
          beta = 'NA',
@@ -356,25 +201,6 @@ parameters %>%
          variable = 52) %>%
   dplyr::select(year, lnalpha.c, beta, Escapement, Recruitment, variable, R2.5., R97.5., S2.5., S97.5.) %>%
   rbind(., dataset) -> dataset
-
-#for(lang.use in c("english", "french")){
-#  out.file <- paste0("state_space_model/output/rjags_Explore_BaseCase/processed/horsetail_",lang.use,".png")
-#  ylab.use <- paste(rosettafish::trans("Recruits", from = "english", to = lang.use, 
-#                                       custom_terms = terms.use, allow_missing = FALSE), "(R)")
-#  xlab.use <- paste(rosettafish::trans("Spawners", from = "english", to = lang.use, 
-#                                       custom_terms = terms.use, allow_missing = FALSE), "(S)")
-  
-#ggplot(data=dataset, aes(x=Escapement, y=Recruitment, group=variable)) +
-#  geom_line(data=subset(dataset,dataset$Variable<52),linetype="solid", size=0.5, color="grey80") +
-#  scale_y_continuous(labels = comma,breaks = seq(0, 400000, 100000), limits = c(0, 400000)) +
-#  scale_x_continuous(labels = comma,breaks = seq(0, 400000, 100000), limits = c(0, 400000)) +
-#  ylab(ylab.use)+xlab(xlab.use) +
-#  geom_line(data=dataset, aes(x=Escapement, y=Escapement, group=1),linetype="solid", size=1) +#replacement line
-#  geom_line(data=subset(dataset,variable==51),colour = "black", lty=2, size=2) +
-#  geom_text(data=subset(dataset,variable==52), aes(x=Escapement, y=Recruitment, label=year,family="Times")) +
-#  geom_errorbar(aes(ymax = R97.5., ymin=R2.5.), width=0.20,linetype = 2, colour="grey50") +
-#  geom_errorbarh(aes(xmax = S97.5., xmin=S2.5.), height=0.20,linetype = 2,colour="grey50")
-#ggsave(out.file, dpi = 500, height = 6, width = 8, units = "in")}
 
 dataset %>%
   filter (variable %in% c(52)) %>%
@@ -404,20 +230,16 @@ coords <- FFieldPtRep(coords = cbind(dataset1$Escapement1 * x.fact, dataset1$Rec
 x.t <- coords$x/x.fact 
 y.t <- coords$y/y.fact
 
-for(lang.use in c("english", "french")){
-  out.file <- paste0("state_space_model/output/rjags_Explore_BaseCase/processed/horsetail_",lang.use,".png")
-  ylab.use <- paste(rosettafish::trans("Recruits", from = "english", to = lang.use, 
-                                       custom_terms = terms.use, allow_missing = FALSE), "(R)")
-  xlab.use <- paste(rosettafish::trans("Spawners", from = "english", to = lang.use, 
-                                       custom_terms = terms.use, allow_missing = FALSE), "(S)")
+out.file <- paste0("output/rjags_base_case/processed/horsetail.png")
+ 
 ggplot(data=dataset1, aes(x=Escapement, y=Median, group=variable)) + 
   geom_line(size=1, lty=2, group=51) +
   geom_ribbon(aes(ymin = q5, ymax = q95, group=51), alpha=.08) +
   geom_ribbon(aes(ymin = q10, ymax = q90, group=51), alpha=.08) +
-  xlab(xlab.use) +
-  ylab(ylab.use) +
-  scale_y_continuous(labels = comma,breaks = seq(0, 400000, 50000), limits = c(0, 400000)) +
-  scale_x_continuous(labels = comma,breaks = seq(0, 400000, 50000), limits = c(0, 400000)) +
+  xlab("Spawners (S)") +
+  ylab("Recruits (R)") +
+  scale_y_continuous(labels = comma,breaks = seq(0, 40000, 5000), limits = c(0, 40000)) +
+  scale_x_continuous(labels = comma,breaks = seq(0, 40000, 5000), limits = c(0, 40000)) +
   geom_line(aes(x=Escapement, y=Escapement, group=51),linetype="solid", size=1) +
   geom_point(data=dataset1, aes(x=x.t, y=y.t, group=52),pch=16, size=1) +
   geom_errorbar(data=dataset1, aes(x=Escapement1, ymax=R97.5., ymin=R2.5., group=52), width=0.2,linetype = 1, colour="grey70") +
@@ -425,156 +247,57 @@ ggplot(data=dataset1, aes(x=Escapement, y=Median, group=variable)) +
   geom_errorbarh(data=dataset1, aes(x=Escapement1, y=Recruitment, xmax=S97.5., xmin=S2.5.),na.rm=T,  linetype = 1, colour="grey70") +
   geom_text(size=3, data=dataset1, aes(x=Escapement1, y=Recruitment, group=52, label=year,family="Times", 
                                      hjust = -0.1, vjust= -0.4)) 
-ggsave(out.file, dpi = 500, height = 6, width = 8, units = "in")}
+ggsave(out.file, dpi = 500, height = 6, width = 8, units = "in")
 
 
 # ESCAPEMENT ESTIMATES
-parameters <- read.csv("state_space_model/output/rjags_Explore_BaseCase/parameters.csv") 
+parameters <- read.csv("output/rjags_base_case/parameters.csv") 
 parameters %>%
-  filter (year %in% c(1980:2018)) -> parameter_set
+  filter (year %in% c(1983:2019)) -> parameter_set
 
-for(lang.use in c("english", "french")){
-  out.file <- paste0("state_space_model/output/rjags_Explore_BaseCase/processed/hist_esc_",lang.use,".png")
-  ylab.use <- paste(rosettafish::trans("Escapement", from = "english", to = lang.use, 
-                                       custom_terms = terms.use, allow_missing = FALSE), "(S)")
-  xlab.use <- paste(rosettafish::trans("Year", from = "english", to = lang.use, 
-                                       custom_terms = terms.use, allow_missing = FALSE))
+  out.file <- paste0("output/rjags_base_case/processed/hist_esc.png")
+
 ggplot(parameter_set, aes(x=year, y=S50.)) + 
-  geom_line(size=0.75) + geom_point (size=2) + ylab(ylab.use) + xlab(xlab.use) +
-  scale_y_continuous(labels = comma,breaks = seq(0, 150000, 25000), limits = c(0, 150000)) + 
-  scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels, limits = c(1974, 2020)) +                    
+  geom_line(size=0.75) + geom_point (size=2) + ylab("Escapement (S)") + xlab("Year") +
+  scale_y_continuous(labels = comma,breaks = seq(0, 15000, 2500), limits = c(0, 15000)) + 
+  scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels, limits = c(1977, 2020)) +                    
   theme(legend.position = "topright") +
   geom_hline(yintercept = SMAX, colour="grey40", size=1, linetype=4) +
   geom_hline(yintercept = SMSY, colour="grey40", size=1, linetype=2) +
   geom_errorbar(aes(ymin=S2.5., ymax=S97.5.),size=0.5, linetype = "solid", colour="grey40", width=0.02) +
-  geom_hline(yintercept=SEQ, colour="grey50", size=1, linetype=1)+
-  geom_hline(yintercept=SGEN, colour="grey40", size=1, linetype=3)
-ggsave(out.file, dpi = 500, height = 6, width = 8, units = "in")}
+  geom_hline(yintercept=SEQ, colour="grey50", size=1, linetype=1)
+ggsave(out.file, dpi = 500, height = 6, width = 8, units = "in")
 
 # ln(R/S)
-parameters <- read.csv("state_space_model/output/rjags_Explore_BaseCase/parameters.csv") 
+parameters <- read.csv("output/rjags_base_case/parameters.csv") 
 parameters %>%
-  filter (year %in% c(1980:2014)) %>%
+  filter (year %in% c(1983:2015)) %>%
   mutate(lnRS = log(R50./S50.))-> parameters
 
-for(lang.use in c("english", "french")){
-  out.file <- paste0("state_space_model/output/rjags_Explore_BaseCase/processed/lnRS_",lang.use,".png")
-  xlab.use <- paste(rosettafish::trans("Brood Year", from = "english", to = lang.use, 
-                                       custom_terms = terms.use, allow_missing = FALSE))
+  out.file <- paste0("output/rjags_base_case/processed/lnRS.png")
 ggplot(parameters, aes(x=year, y=lnRS))+
   geom_point(size=4, color = "black", shape = 18) +
-  xlab(xlab.use) + 
+  xlab("Brood Year") + 
   ylab("ln(R/S)") +
   scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels, limits = c(1980, 2020))+
   geom_label((aes(label=year)))+ 
   geom_smooth(method="gam", formula=y~s(x, k=10),colour="black", 
               method.args=list(family="gaussian", se=TRUE)) 
-ggsave(out.file, dpi = 500, height = 6, width = 8, units = "in")}
-
-# TERMINAL RUN FROM 2018 C&E TABLES
-for(lang.use in c("english", "french")){
-  out.file <- paste0("state_space_model/output/rjags_Explore_BaseCase/processed/terminal_compar_",lang.use,".png")
-  xlab.use <- paste(rosettafish::trans("Year", from = "english", to = lang.use, 
-                                       custom_terms = terms.use, allow_missing = FALSE))
-  ylab.use <- paste(rosettafish::trans("Terminal Run", from = "english", to = lang.use, 
-                                       custom_terms = terms.use, allow_missing = FALSE))
-terminalrun %>%
-  filter(type=="historic") %>%
-ggplot(., aes(x=year, y=terminal_run))+
-  geom_col(position = position_dodge(width=1), fill = "grey30")+
-  xlab(xlab.use) + 
-  ylab(ylab.use) + annotate("text",x = 1979, y=450000, label="a)", family="Arial" ,size=6) +
-  annotate("rect", xmin = 1980, xmax = 2020, ymin = 71000, ymax = 80000,
-           inherit.aes = FALSE, fill = "grey90", alpha = 0.5) +
-  scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels, limits = c(1980, 2020)) +
-  scale_y_continuous(labels = comma,breaks = seq(0, 450000, 50000), limits = c(0, 450000)) -> plot1
-
-ggplot(parameters, aes(x=year, y=N50.)) + geom_col(position = position_dodge(width=1), fill = "grey30")+ 
-  ylab(ylab.use) + xlab(xlab.use) + annotate("text",x = 1979, y=450000, label="b)", family="Arial" ,size=6) +
-  annotate("rect", xmin = 1980, xmax = 2020, ymin = 40000, ymax = 75000,
-           inherit.aes = FALSE, fill = "grey90", alpha = 0.5) +
-  scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels, limits = c(1980, 2020)) +
-  scale_y_continuous(labels = comma,breaks = seq(0, 450000, 50000), limits = c(0, 450000)) -> plot2
-cowplot::plot_grid(plot1,plot2, align = "v", nrow = 2, ncol=1) 
-ggsave(out.file, dpi = 500, height = 8, width = 9, units = "in")}
+ggsave(out.file, dpi = 500, height = 6, width = 8, units = "in")
 
 # ln(R/S) versus S
-parameters <- read.csv("state_space_model/output/rjags_Explore_BaseCase/parameters.csv") 
+parameters <- read.csv("output/rjags_base_case/parameters.csv") 
 parameters %>%
-  filter (year %in% c(1980:2014)) %>%
+  filter (year %in% c(1983:2015)) %>%
   mutate(lnRS = log(R50./S50.),
          S = (S50.))-> parameters
 ggplot(parameters, aes(x=S, y=lnRS))+
   geom_point(size=4, color = "black", shape = 18) +
-  xlab("Spawners") + 
+  xlab("Spawners (S)") + 
   ylab("ln(R/S)") +
   geom_label((aes(label=year)))+ 
   geom_smooth(method="gam", formula=y~s(x, k=10),colour="black", 
               method.args=list(family="gaussian", se=TRUE)) 
-ggsave("state_space_model/output/rjags_Explore_BaseCase/processed/lnRS_S.png", dpi = 500, height = 6, width = 8, units = "in")
+ggsave("output/rjags_base_case/processed/lnRS_S.png", dpi = 500, height = 6, width = 8, units = "in")
 
 
-# PREVIOUSLY PUBLISHED ESTIMATES
-for(lang.use in c("english", "french")){
-  out.file <- paste0("state_space_model/output/rjags_Explore_BaseCase/processed/prev_publ_",lang.use,".png")
-  ylab.use <- paste(rosettafish::trans("Capture-recapture abundance estimates", from = "english", to = lang.use, 
-                                       custom_terms = terms.use, allow_missing = FALSE))
-  xlab.use <- paste(rosettafish::trans("Year", from = "english", to = lang.use, 
-                                       custom_terms = terms.use, allow_missing = FALSE))
-  pubestimates %>%
-    filter(type == "PP") %>%
-    mutate(CI_lower = mean - (sd *2),
-           CI_upper = mean + (sd *2))-> data
-  pubestimates %>%
-      mutate(type = factor(type, ordered = TRUE, 
-                        levels = c("PP", "PubEstAdj", "PubEst"),
-                        labels = c("PP", "Prev. Publ. (adjusted)", "Prev. Publ."))) %>%
-  ggplot(., aes(x=year, y=mean, fill = type, colour=type, lty=type, shape =type)) + 
-    geom_line(size=1) + geom_point (size = 3) +
-    xlab(xlab.use) + 
-    ylab(ylab.use) +  
-    #annotate("text",x = 1980, y=225000, label="a)", family="Arial" ,size=6)+
-    scale_shape_manual(values = c(16,NA,NA)) +
-    scale_color_manual(values=c("grey70", "black","black")) +
-    scale_linetype_manual(values = c("solid", "dotted", "solid")) +
-    scale_y_continuous(labels = comma,breaks = seq(0, 225000, 25000), limits = c(0, 225000)) +
-    scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels, limits = c(1980, 2018)) +
-    geom_ribbon(data=data, aes(ymin=CI_lower, ymax=CI_upper), alpha=0.10, colour ="grey95") +
-    theme(legend.title=element_blank(), legend.position=c(0.70,0.10), legend.key = element_blank(), legend.background = element_rect(color = "white")) +
-    guides(color=guide_legend(override.aes=list(fill=NA))) -> plot1
-  
-  
-  pubestimates_expanded %>%
-    mutate(type = factor(type, ordered = TRUE, 
-                         levels = c("PP", "PubEstAdj", "PubEst"),
-                         labels = c("PP", "Prev. Publ. (adjusted)", "Prev. Publ."))) %>%
-    ggplot(., aes(x=year, y=mean, fill = type, colour=type, lty=type, shape =type)) + 
-    geom_line(size=1) + geom_point (size = 3) +
-    xlab(xlab.use) + 
-    ylab(ylab.use) +  annotate("text",x = 1980, y=225000, label="b)", family="Arial" ,size=6)+
-    scale_shape_manual(values = c(16,NA,NA)) +
-    scale_color_manual(values=c("grey70", "black","black")) +
-    scale_linetype_manual(values = c("solid", "dotted", "solid")) +
-    scale_y_continuous(labels = comma,breaks = seq(0, 225000, 25000), limits = c(0, 225000)) +
-    scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels, limits = c(1980, 2018)) +
-    geom_ribbon(data=data, aes(ymin=CI_lower, ymax=CI_upper), alpha=0.10, colour ="grey95") +
-    theme(legend.title=element_blank(), legend.position=c(0.80,0.10), legend.key = element_blank(), legend.background = element_rect(color = "white")) +
-    guides(color=guide_legend(override.aes=list(fill=NA))) -> plot2
-  cowplot::plot_grid(plot1, align = "v", nrow = 1, ncol=1) 
-  ggsave(out.file, dpi = 500, height = 4, width = 6, units = "in")}
-
-#terminal run yield comparison
-#terminalrun %>%
-#  dplyr::summarize(mean_yield = mean(yield, na.rm=T),
-#         mean_yield_state_space = mean(yield_state_space, na.rm=T)) -> terminal_run
-#ggplot(terminalrun, aes(x=year, y=yield)) +
-#  geom_col(position = position_dodge(width=1), fill = "yellow", colour ="black")+
-#  geom_col(aes(y=yield_state_space), fill ="grey50") +
-#  xlab("Year") + 
-#  ylab("Yield") +
-#  geom_hline(yintercept = terminal_run$mean_yield, colour="yellow", size=1, linetype=4) +
-#  geom_hline(yintercept = terminal_run$mean_yield_state_space, colour="grey50", size=1, linetype=4) +
-#  scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels, limits = c(1980, 2020)) +
-#  scale_y_continuous(labels = comma,breaks = seq(0, 450000, 50000), limits = c(0, 450000))
-#
-#ggsave("state_space_model/output/rjags_Explore_BaseCase/processed/yield.png", dpi = 500, height = 6, width = 8, units = "in")

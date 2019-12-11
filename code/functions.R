@@ -71,8 +71,8 @@ profile <-function(i,z,xa.start, xa.end,lnalpha.c, beta){
   qm <- spread(qm, measure, value)
   qm <- qm[c("q95", "q90", "Median","q10", "q5", "Escapement")]
   Y <- Y[c("oy_0.9", "oy_0.8", "or_0.9","or_0.8", "of_0.9", "of_0.8", "oy_0.7","or_0.7","of_0.7","Escapement")]
-  write.csv(qm,("state_space_model/output/rjags_Explore_BaseCase/processed/QM.csv"), row.names=FALSE)
-  write.csv(Y,("state_space_model/output/rjags_Explore_BaseCase/processed/Y.csv"), row.names=FALSE)
+  write.csv(qm,("output/rjags_base_case/processed/QM.csv"), row.names=FALSE)
+  write.csv(Y,("output/rjags_base_case/processed/Y.csv"), row.names=FALSE)
   
   # confidence intervals ----
   dat10 %>%
@@ -90,39 +90,9 @@ profile <-function(i,z,xa.start, xa.end,lnalpha.c, beta){
   CI <- data.frame(measure = names(mq), value = as.numeric(mq[1,]), Escapement=rep(c(0,x), length(unique(names(mq)))))
   CI <- spread(CI, measure, value)
   CI <- CI[c("q95", "q90", "Median","q10", "q5", "Escapement")]
-  write.csv(CI,("state_space_model/output/rjags_Explore_BaseCase/processed/CI.csv"), row.names=FALSE)
+  write.csv(CI,("output/rjags_base_case/processed/CI.csv"), row.names=FALSE)
   
-  # create probability profile plots (0.7, 0.8, 0.9, 0.8 & 0.9)
-  #Y %>% 
-  #  dplyr::select(Escapement, oy_0.7, of_0.7,or_0.7) %>% 
-  #  gather(key="variable", value="value", -Escapement) %>% 
-  #  ggplot(aes(Escapement/1000, value, lty=variable))+geom_line()+
-  #  xlab('Escapement (1,000)')+ylab('Probability')+
-  #  theme(legend.justification=c(1,0), legend.position=c(1,.5), 
-  #        legend.key = element_blank(),legend.title=element_blank())
-  #ggsave("state_space_model/output/rjags_Explore_BaseCase/processed/0.7.AR.png", dpi=200, width=8, height=5, units='in')
-  
-  #Y %>% 
-  #  dplyr::select(Escapement, oy_0.8, of_0.8, or_0.8) %>%
-  #  gather(key="variable", value="value", -Escapement) %>% 
-  #  ggplot(aes(Escapement, value, lty=variable))+geom_line()+
-  #  xlab('Escapement')+ylab('Probability')+ 
-  #  scale_x_continuous(labels = comma,breaks = seq(0, 300000, 25000), limits = c(0,300000))+
-  # theme(legend.justification=c(1,0), legend.position=c(1,.5), 
-  #        legend.key = element_blank(),legend.title=element_blank())
-  #ggsave("state_space_model/output/rjags_Explore_BaseCase/processed/0.8.AR.png", dpi=200, width=8, height=5, units='in')
-  
-  #Y %>% 
-  #  dplyr::select(Escapement, oy_0.9, of_0.9, or_0.9) %>% 
-  #  gather(key="variable", value="value", -Escapement) %>% 
-  #  ggplot(aes(Escapement, value, lty=variable))+geom_line()+
-  #  xlab('Escapement')+ylab('Probability')+    
-  #  scale_x_continuous(labels = comma,breaks = seq(0, 300000, 25000), limits = c(0,300000))+
-  #  theme(legend.justification=c(1,0), legend.position=c(1,.5), 
-  #        legend.key = element_blank(),legend.title=element_blank())
-  #ggsave("state_space_model/output/rjags_Explore_BaseCase/processed/0.9.AR.png", dpi=200, width=8, height=5, units='in')
-  
-read.csv("state_space_model/output/rjags_Explore_BaseCase/processed/Y.csv") -> Y
+read.csv("output/rjags_base_case/processed/Y.csv") -> Y
   Y %>% 
     dplyr::select(Escapement, oy_0.9, oy_0.8, oy_0.7) %>% 
     gather(key="variable", value="value", -Escapement) %>% 
@@ -138,7 +108,6 @@ read.csv("state_space_model/output/rjags_Explore_BaseCase/processed/Y.csv") -> Y
            max_pct =ifelse(grepl("of_0.7",variable), 
                            0.7,
                            ifelse(grepl("of_0.8",variable),0.8, 0.9)))-> my2
-  
   
   Y %>% 
     dplyr::select(Escapement, or_0.9, or_0.8, or_0.7) %>% 
@@ -164,104 +133,54 @@ read.csv("state_space_model/output/rjags_Explore_BaseCase/processed/Y.csv") -> Y
   my4 %>%
     filter(sra == "Recruitment Profile") -> fig_data3
     
-# INTERIM PLOT (english)
-  ggplot(fig_data1, aes(x = Escapement, y = Probability, linetype = max_pct)) + ggtitle("c) Yield Profile") + 
-    annotate("rect", xmin = 71000, xmax = 80000, ymin = 0, ymax = 1,
+# PROFILES 
+  ggplot(fig_data1, aes(x = Escapement, y = Probability, linetype = max_pct)) + 
+    annotate("rect", xmin = 4000, xmax = 9000, ymin = 0, ymax = 1,
              inherit.aes = FALSE, fill = "grey80", alpha = 0.9) +
-    annotate("rect", xmin = 49500, xmax = 55700, ymin = 0, ymax = 1,
+    annotate("rect", xmin = 3000, xmax = 8000, ymin = 0, ymax = 1,
              inherit.aes = FALSE, fill = "grey80", alpha = 0.3) + 
-    theme(plot.title = element_text(size = 12, face = "bold"),
-          strip.text.y = element_text(size=0),legend.position="none") +
-    geom_line() +
-    scale_x_continuous(labels = comma, breaks = seq(0, 100000, 10000), limits = c(0, 100000), expand=c(0,0))+
+    geom_line() + theme(legend.position= "none") +
+    scale_x_continuous(labels = comma, breaks = seq(0, 14000, 2000), limits = c(0, 14000),expand=c(0,0))+
     scale_y_continuous(breaks = seq(0, 1, 0.25), limits = c(0, 1))+
     scale_linetype_discrete(name = "Percent of Max.") + xlab('Escapement (S)')+
-    facet_grid(sra ~ .) +geom_vline(xintercept=43857 , lwd=1.25,colour="grey80") -> plot1
+    facet_grid(sra ~ .) +geom_vline(xintercept=4000 , lwd=1.25,colour="grey80") -> plot1
   
-  ggplot(fig_data2, aes(x = Escapement, y = Probability, linetype = max_pct)) + 
-    annotate("rect", xmin = 71000, xmax = 80000, ymin = 0, ymax = 1,
-             inherit.aes = FALSE, fill = "grey80", alpha = 0.9) + ggtitle("a) Overfishing Profile") + 
-    annotate("rect", xmin = 49500, xmax = 55700, ymin = 0, ymax = 1,
-             inherit.aes = FALSE, fill = "grey80", alpha = 0.3) + 
-    theme(plot.title = element_text(size = 12, face = "bold"),
-          strip.text.y = element_text(size=0),legend.position=c(0.95,0.88), legend.title = element_blank()) +
+  ggplot(fig_data2, aes(x = Escapement, y = Probability, linetype = max_pct)) +
+    annotate("rect", xmin = 4000, xmax = 9000, ymin = 0, ymax = 1,
+             inherit.aes = FALSE, fill = "grey80", alpha = 0.9) +
+    annotate("rect", xmin = 3000, xmax = 8000, ymin = 0, ymax = 1,
+             inherit.aes = FALSE, fill = "grey80", alpha = 0.3)  + 
+    theme(legend.position=c(0.90,0.85), legend.title = element_blank()) +
     geom_line() + xlab('Escapement (S)') +
-    scale_x_continuous(labels = comma, breaks = seq(0, 100000, 10000), limits = c(0, 100000),expand=c(0,0))+
+    scale_x_continuous(labels = comma, breaks = seq(0, 14000, 2000), limits = c(0, 14000),expand=c(0,0))+
     scale_linetype_discrete(name = "Percent of Max.") + 
-    facet_grid(sra ~ .) +geom_vline(xintercept=43857 , lwd=1.25,colour="grey80")-> plot2
+    facet_grid(sra ~ .) +geom_vline(xintercept=4000 , lwd=1.25,colour="grey80")-> plot2
   
-  ggplot(fig_data3, aes(x = Escapement, y = Probability, linetype = max_pct)) + 
-    annotate("rect", xmin = 71000, xmax = 80000, ymin = 0, ymax = 1,
-             inherit.aes = FALSE, fill = "grey80", alpha = 0.9) + ggtitle("b) Recruitment Profile") + 
-    annotate("rect", xmin = 49500, xmax = 55700, ymin = 0, ymax = 1,
-             inherit.aes = FALSE, fill = "grey80", alpha = 0.3) +
-  theme(plot.title = element_text(size = 12, face = "bold"),
-  strip.text.y = element_text(size=0),legend.position= "none") +
-    geom_line() + xlab('Escapement (S)') +  
-    scale_x_continuous(labels = comma, breaks = seq(0, 100000, 10000), limits = c(0, 100000),expand=c(0,0))+
-    scale_linetype_discrete(name = "Percent of Max.") +
-    facet_grid(sra ~ .) +geom_vline(xintercept=43857 , lwd=1.25,colour="grey80") -> plot3
-  cowplot::plot_grid(plot2,plot3,plot1, align = "v", nrow = 3, ncol=1) 
-  ggsave("state_space_model/output/rjags_Explore_BaseCase/processed/interim_english.png", dpi = 500, height = 8, width = 9, units = "in")
-  
-
-  # HYPOTHETICAL (english)
-  ggplot(fig_data1, aes(x = Escapement, y = Probability, linetype = max_pct)) +
-    annotate("rect", xmin = 40000, xmax = 75000, ymin = 0, ymax = 1,
-             inherit.aes = FALSE, fill = "grey80", alpha = 0.3) + ggtitle("c) Yield Profile") +
-    geom_line() +
-    scale_x_continuous(labels = comma, breaks = seq(0, 100000, 10000), limits = c(0, 100000), expand=c(0,0))+
-    scale_y_continuous(breaks = seq(0, 1, 0.25), limits = c(0, 1)) + 
-    theme(plot.title = element_text(size = 12, face = "bold"),
-          strip.text.y = element_text(size=0),legend.position= "none") +
-    scale_linetype_discrete(name = "Percent of Max.") +
-    geom_segment(aes(x=40000, y=0.92, xend=75000, yend=0.43), colour="grey50") + xlab('Escapement (S)') +
-    geom_segment(aes(x=0, y=0.92, xend=40000, yend=0.92), colour="grey50") +
-    facet_grid(sra ~ .) + geom_vline(xintercept=43857 , lwd=1.25,colour="grey80") -> plot1
-  
-  ggplot(fig_data2, aes(x = Escapement, y = Probability, linetype = max_pct)) + 
-    annotate("rect", xmin = 40000, xmax = 75000, ymin = 0, ymax = 1,
-             inherit.aes = FALSE, fill = "grey80", alpha = 0.3) + ggtitle("a) Overfishing Profile") +
-    geom_line() + 
-    geom_point(aes(x=40000, y=0.17), colour="black", size=3) + xlab('Escapement (S)') +
-    geom_point(aes(x=40000, y=0.08), colour="black", size=3) +
-    geom_point(aes(x=40000, y=0.05), colour="black", size=3) + 
-    theme(plot.title = element_text(size = 12, face = "bold"),
-          strip.text.y = element_text(size=0), legend.position=c(0.95,0.88), legend.title = element_blank()) +
-    scale_x_continuous(labels = comma, breaks = seq(0, 100000, 10000), limits = c(0, 100000),expand=c(0,0)) +
-    scale_linetype_discrete(name = "Percent of Max.") +  
-    facet_grid(sra ~ .) +geom_vline(xintercept=43857 , lwd=1.25,colour="grey80")-> plot2
-  
-  ggplot(fig_data3, aes(x = Escapement, y = Probability, linetype = max_pct)) + ggtitle("b) Recruitment Profile") +
-    annotate("rect", xmin = 40000, xmax = 75000, ymin = 0, ymax = 1,
+  ggplot(fig_data2, aes(x = Escapement, y = Probability, linetype = max_pct)) +
+    annotate("rect", xmin = 4000, xmax = 9000, ymin = 0, ymax = 1,
+             inherit.aes = FALSE, fill = "grey80", alpha = 0.9) +
+    annotate("rect", xmin = 3000, xmax = 8000, ymin = 0, ymax = 1,
              inherit.aes = FALSE, fill = "grey80", alpha = 0.3) + 
-    theme(plot.title = element_text(size = 12, face = "bold"),
-          strip.text.y = element_text(size=0),legend.position="none") +
-    geom_line()+ xlab('Escapement (S)')  + 
-    scale_x_continuous(labels = comma, breaks = seq(0, 100000, 10000), limits = c(0, 100000),expand=c(0,0))+
-    scale_linetype_discrete(name = "Percent of Max.") + 
-    facet_grid(sra ~ .) +geom_vline(xintercept=43857 , lwd=1.25,colour="grey80") -> plot3
-  
+  theme(legend.position= "none") +
+    geom_line() + xlab('Escapement (S)') +  
+    scale_x_continuous(labels = comma, breaks = seq(0, 14000, 2000), limits = c(0, 14000),expand=c(0,0))+
+    scale_linetype_discrete(name = "Percent of Max.") +
+    facet_grid(sra ~ .) +geom_vline(xintercept=4000 , lwd=1.25,colour="grey80") -> plot3
   cowplot::plot_grid(plot2,plot3,plot1, align = "v", nrow = 3, ncol=1) 
-  ggsave("state_space_model/output/rjags_Explore_BaseCase/processed/hyp_english.png", dpi = 500, height = 8, width = 9, units = "in")
+  ggsave("output/rjags_base_case/processed/profiles.png", dpi = 500, height = 8, width = 9, units = "in")
   
 # EXPECTED SUSTAINED YIELD 
-for(lang.use in c("english","english")){
-  out.file <- paste0("state_space_model/output/rjags_Explore_BaseCase/processed/expect_yield_",lang.use,".png")
-  xlab.use <- paste(rosettafish::trans("Escapement", from = "english", to = lang.use, 
-                                       custom_terms = terms.use, allow_missing = FALSE), "(S)")
-  ylab.use <- paste(rosettafish::trans("Expected Yield", from = "english", to = lang.use, 
-                                       custom_terms = terms.use, allow_missing = FALSE))
+out.file <- paste0("output/rjags_base_case/processed/expect_yield.png")
 ggplot(qm, aes(Escapement, Median))+geom_line(size=1)+
   geom_ribbon(aes(ymin = q5, ymax = q95), alpha=.15)+
-  geom_ribbon(aes(ymin = q10, ymax = q90), alpha=.15)+ xlab(xlab.use)+
-  ylab(ylab.use)+scale_y_continuous(labels = comma)+
-  scale_x_continuous(labels = comma,breaks = seq(0, 200000, 25000), limits = c(0,200000))+
-  scale_y_continuous(labels = comma,breaks = seq(-200000, 200000, 25000), limits = c(-200000,200000))+
+  geom_ribbon(aes(ymin = q10, ymax = q90), alpha=.15)+ xlab("Escapement (S)")+
+  ylab("Expected Yield")+scale_y_continuous(labels = comma)+
+  scale_x_continuous(labels = comma,breaks = seq(0, 20000, 5000), limits = c(0,20000))+
+  scale_y_continuous(labels = comma,breaks = seq(-20000, 20000, 5000), limits = c(-20000,20000))+
   geom_vline(xintercept = LowerB,linetype = "longdash" )+geom_vline(xintercept = UpperB ,linetype = "longdash")+
   geom_vline(xintercept = SMSY,linetype = 1 )
 ggsave(out.file, dpi = 500, height = 4, width = 6, units = "in")}
-}
+
 
 
 
