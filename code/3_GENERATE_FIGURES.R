@@ -89,9 +89,9 @@ ggplot(parameters, aes(x=year, y=(S50.))) +
 maxY<-max(parameters$N97.5., na.rm=TRUE)*1.5
 ggplot(parameters, aes(x=year, y=N50.))+geom_line(size=0.75) + 
   geom_point (size=2) + xlab("Year") +
-  ylab("Terminal Run Abundance (N)") +annotate("text",x = 1977, y = 40000, label="(c)", family="Arial" ,size=6) +
+  ylab("Terminal Run Abundance (N)") +annotate("text",x = 1977, y = 60000, label="(c)", family="Arial" ,size=6) +
   geom_ribbon(aes(ymin=N2.5., ymax=N97.5.), alpha=0.20) +
-  scale_y_continuous(labels = comma,breaks = seq(0, 40000, 5000), limits = c(0, 40000)) +
+  scale_y_continuous(labels = comma,breaks = seq(0, 60000, 5000), limits = c(0, 60000)) +
   scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels) +
   theme(legend.position = "none") -> plot2
 
@@ -111,9 +111,9 @@ ggsave(out.file, dpi = 500, height = 8, width = 9, units = "in")
 out.file <- paste0("output/rjags_base_case/processed/returns_est.png")
 maxY<-max(parameters$R97.5., na.rm=TRUE)*1.5
 ggplot(parameters, aes(x=year, y=(R50.))) + geom_line(size=0.75) + 
-  geom_point(size=2)+ylab("Returns (R)") + xlab("") + annotate("text",x = 1977, y= 40000, label="(a)", family="Arial" ,size=6) +
+  geom_point(size=2)+ylab("Returns (R)") + xlab("") + annotate("text",x = 1977, y= 60000, label="(a)", family="Arial" ,size=6) +
   geom_ribbon(aes(ymin=R2.5., ymax=R97.5.), alpha=0.20) +
-  scale_y_continuous(labels = comma,breaks = seq(0, 40000, 5000), limits = c(0, 40000)) +
+  scale_y_continuous(labels = comma,breaks = seq(0, 60000, 5000), limits = c(0, 60000)) +
   scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels) +
   theme(legend.position = "none") -> plot1
 
@@ -268,7 +268,7 @@ ggplot(parameter_set, aes(x=year, y=S50.)) +
   geom_hline(yintercept=SEQ, colour="grey50", size=1, linetype=1)
 ggsave(out.file, dpi = 500, height = 6, width = 8, units = "in")
 
-# ln(R/S)
+# ln(R/S) versus year
 parameters <- read.csv("output/rjags_base_case/parameters.csv") 
 parameters %>%
   filter (year %in% c(1983:2015)) %>%
