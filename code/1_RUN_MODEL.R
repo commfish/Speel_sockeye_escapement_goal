@@ -28,6 +28,7 @@ install.packages("devtools")
 devtools::install_github("ben-williams/FNGr")
 library(FNGr)
 library(extrafont)
+
 # STEP 1: CHOOSE SETTINGS----
 
 # if test runs then do sensitivity tests with explore, and final run with full
@@ -63,7 +64,6 @@ if(jags.settings == "explore"){
   by.use <- 100 # this is just for the progress bar
 }
 
-
 if(jags.settings == "full"){
   n.adapt.use <- 10000  ; n.iter.use <- 1000000    #1,000,000 per chain; 3 chains; thin by 1000
   n.burnin.use <- 10000  # consider increasing this?
@@ -84,7 +84,7 @@ source("code/model_inits.R")
 start.jags <- proc.time()
 #rjags
 if(package.use == "rjags" & sensitivity.analysis == 0){
-  parameters <- c('alpha','beta', 'lnalpha','lnalpha.c','phi',
+  parameters <- c('alpha','alpha.c', 'beta', 'lnalpha','lnalpha.c','phi',
                   'sigma.R','log.resid.0', 'mean.log.R0','log.resid',
                   'S','R','N','pi','h.b','N.ya','mu.HB',
                   'p','q', 'S.max','D.sum','sigma.R0',
@@ -95,11 +95,9 @@ if(package.use == "rjags" & sensitivity.analysis == 0){
   post <- rjags::coda.samples(jmod, parameters, n.iter=n.iter.use, thin=thin.use, n.burnin=n.burnin.use)
 
 end.jags <- proc.time()   # store time for MCMC
-# post = original output from rjags::coda.samples
-# post.arr = reformatted version of post
 post.arr <- as.array(post) # convert to an accessible obj
 
 # run the script that generates all the outputs 
-#source("code/2_GENERATE_OUTPUTS.R")
+source("code/2_GENERATE_OUTPUTS.R")
 }
 

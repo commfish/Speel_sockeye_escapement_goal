@@ -15,7 +15,7 @@
 loadfonts(device="win")
 windowsFonts(Times=windowsFont("Arial"))
 
-parameters <- c('alpha','beta', 'lnalpha','lnalpha.c','phi',
+parameters <- c('alpha','beta', 'alpha.c', 'lnalpha','lnalpha.c','phi',
                 'sigma.R','log.resid.0', 'mean.log.R0','log.resid',
                 'S','R','N','pi','h.b','N.ya','mu.HB',
                 'p','q', 'S.max','D.sum','sigma.R0',
@@ -77,6 +77,11 @@ x <- post.arr[,parameters,]
 alpha<-quantile(x, probs=c(0, 0.025, 0.05, 0.5, 0.95, 0.975, 1))
 alpha <- data.frame(alpha)
 
+parameters=c('alpha.c')
+x <- post.arr[,parameters,]
+alpha.c<-quantile(x, probs=c(0, 0.025, 0.05, 0.5, 0.95, 0.975, 1))
+alpha.c <- data.frame(alpha.c)
+
 parameters=c('lnalpha')
 x <- post.arr[,parameters,]
 lnalpha<-quantile(x, probs=c(0, 0.025, 0.05, 0.5, 0.95, 0.975, 1))
@@ -137,19 +142,20 @@ x <- post.arr[,parameters,]
 pi<-quantile(x, probs=c(0, 0.025, 0.05, 0.5, 0.95, 0.975, 1))
 pi3 <- data.frame(pi)
 
-step1 <- cbind(alpha, lnalpha)
-step2 <- cbind(step1, lnalpha.c)
-step3 <- cbind(step2, beta)
-step4 <- cbind(step3, phi)
-step5 <- cbind(step4, sigma.R)
-step6 <- cbind(step5, S.eq.c)
-step7 <- cbind(step6, S.max)
-step8 <- cbind(step7, D.sum)
-step9 <- cbind(step8, B.sum)
-step10 <- cbind(step9, pi1)
-step11 <- cbind(step10, pi2)
-step12 <- cbind(step11, pi3)
-step12 %>% 
+step1 <- cbind(alpha, alpha.c)
+step2 <- cbind(step1, lnalpha)
+step3 <- cbind(step2, lnalpha.c)
+step4 <- cbind(step3, beta)
+step5 <- cbind(step4, phi)
+step6 <- cbind(step5, sigma.R)
+step7 <- cbind(step6, S.eq.c)
+step8 <- cbind(step7, S.max)
+step9 <- cbind(step8, D.sum)
+step10 <- cbind(step9, B.sum)
+step11 <- cbind(step10, pi1)
+step12 <- cbind(step11, pi2)
+step13 <- cbind(step12, pi3)
+step13 %>% 
   t()%>%
 write.csv(., file= paste0(out.path,"/percentiles.csv")) 
 
@@ -301,10 +307,9 @@ coda<-rbind(coda1,coda2,coda3)
 write.csv(coda, file= paste0(out.path,"/coda.csv") ,row.names=FALSE)  
 coda %>% 
   mutate(Smsy_lambert = (1-lambert_W0(exp(1-lnalpha.c)))/beta,
-         Umsy_lambert = (1-lambert_W0(exp(1-lnalpha.c))),
-         Smsy_lambert80 = Smsy_lambert *0.80)  %>%
+         Umsy_lambert = (1-lambert_W0(exp(1-lnalpha.c))))  %>%
   as.data.frame() %>%
-  dplyr::select(Smsy_lambert,Umsy_lambert, Smsy_lambert80) -> coda
+  dplyr::select(Smsy_lambert,Umsy_lambert) -> coda
 coda %>% 
   apply(., 2, sd) %>%
   as.data.frame()%>%
@@ -363,17 +368,17 @@ ggplot(Smsy, aes(x=Smsy, fill=Smsy, color = Smsy)) +
   geom_density(fill ="#999999", alpha=0.5)+ annotate("text",x = 0, y=0.0006, label="a)", family="Arial" ,size=6) +
   scale_color_manual(values=c("#999999"))+
   scale_fill_manual(values=c("#999999"))+
-  geom_vline(xintercept = 43857,linetype = "longdash" ) +
+  #geom_vline(xintercept = 43857,linetype = "longdash" ) +
   labs(x="Smsy",y="Density") + theme_set(theme_bw(base_size=14,base_family=
                                              'Arial')+
                                     theme(panel.grid.major = element_blank(),
                                           panel.grid.minor = element_blank())) + theme(legend.position="none")+ 
- scale_x_continuous(labels = comma,breaks = seq(0, 150000, 25000), limits = c(0, 150000)) -> plot1
+ scale_x_continuous(labels = comma,breaks = seq(0, 25000, 5000), limits = c(0, 25000)) -> plot1
 
 ggplot(Umsy, aes(x=Umsy, fill=Umsy)) +
   geom_density(fill ="#999999", alpha=0.5)+ annotate("text",x = 0, y=5, label="b)", family="Arial" ,size=6) +
   scale_color_manual(values=c("#999999"))+
-  scale_fill_manual(values=c("#999999"))+geom_vline(xintercept = 0.75,linetype = "longdash" ) +
+  scale_fill_manual(values=c("#999999"))+#geom_vline(xintercept = 0.75,linetype = "longdash" ) +
   labs(x="Umsy",y="Density") + theme_set(theme_bw(base_size=14,base_family=
                                                       'Arial')+
                                              theme(panel.grid.major = element_blank(),
@@ -384,7 +389,7 @@ cowplot::plot_grid(plot1,plot2,  align = "v", nrow = 2, ncol=1)
 ggsave(out.file, dpi = 500, height = 6, width = 8, units = "in")
 
 #trace and density plots----
-parameters <- c('alpha', 'lnalpha', 'lnalpha.c','beta','phi','sigma.R','S.eq.c','S.max','D.sum', 'pi')
+parameters <- c('alpha', 'lnalpha', 'lnalpha.c','beta','phi','sigma.R','S.eq.c','S.max','D.sum', 'pi', 'alpha.c', 'B.sum')
 png("output/rjags_base_case/density_other.png",res=500, width=8, height=9, units ="in")
 denplot(post, parms = c(parameters), style="plain", greek=TRUE, col="gray30", collapse =T)
 dev.off()
@@ -393,7 +398,7 @@ dev.off()
 # autocorrelation plots----
 windows(record=T)
 pdf("output/rjags_base_case/autocorr.pdf",height=6, width=8,onefile=T,useDingbats=F)
-autocorr.plot(post, lag.max=5)
+autocorr.plot(post, lag.max=1)
 dev.off()
 dev.off()
 autocorr.summary<-autocorr.diag(post)
