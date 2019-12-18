@@ -4,12 +4,12 @@
 # input values below based on stats output
 LowerB <- 3000  #lower bound of recommended escapement goal range
 UpperB <- 7000 #upper bound of recommended escapement goal range
-SMSY <- 4800  #Lambert W from lambert file
-UMSY <- 0.62  #median from staquants file
-SMAX <- 7574  #median from staquants file
+SMSY <- 4226  #Lambert W from lambert file
+UMSY <- 0.33  #median from staquants file
+SMAX <- 13328  #median from staquants file
 SEQ <- 12557 #median from staquants file
-lnalpha.c <-  1.51 #median from staquants file
-beta <- 0.00013  #median from staquants file
+lnalpha.c <-  1.25 #median from staquants file
+beta <- 7.50318E-05  #median from staquants file
 
 # load----
 library(tidyverse)
@@ -55,7 +55,7 @@ theme_set(theme_sleek())
 
 profile(i=10, z=50, xa.start=0, xa.end=8000,lnalpha.c, beta) #can change i,z, xa.start, xa.end
 
-# read in data
+# read in data----
 Speel_sockeye <- read.csv("data/Speel_sockeye.csv") 
 p_q_Nya<- read.csv("output/rjags_base_case/p_q_Nya.csv") 
 QM <- read.csv("output/rjags_base_case/processed/QM.csv")
@@ -63,7 +63,6 @@ CI<- read.csv("output/rjags_base_case/processed/CI.csv")
 coda <- read.csv("output/rjags_base_case/coda.csv") 
 parameters <- read.csv("output/rjags_base_case/parameters.csv") 
 
-# escapement, returns, run abundance, and residuals by year
 parameters %>%
   mutate (year = as.numeric(year),
   S97.5. = as.numeric(S97.5.),
@@ -79,11 +78,11 @@ maxY<-max(parameters$S97.5., na.rm=TRUE)*1.5
 ggplot(parameters, aes(x=year, y=(S50.))) +
   geom_line(size=0.75)+ geom_point (size=2)+ylab("Escapement (S)") + xlab("") +
   geom_ribbon(aes(ymin=(parameters$S2.5.), ymax=(parameters$S97.5.)), alpha=0.20) +
-  scale_y_continuous(labels = comma,breaks = seq(0, 20000, 5000), limits = c(0, 20000)) +
+  scale_y_continuous(labels = comma,breaks = seq(0, 40000, 5000), limits = c(0, 40000)) +
   scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels) +
   theme(legend.position = "none") +
   geom_line(aes(y=SMSY), colour="grey40", size=1, linetype=2)+
-  annotate("text",x = 1977, y= 20000, label="(a)", family="Arial" ,size=6) -> plot1
+  annotate("text",x = 1977, y= 30000, label="(a)", family="Arial" ,size=6) -> plot1
 
 # terminal run abundance   
 maxY<-max(parameters$N97.5., na.rm=TRUE)*1.5
@@ -91,7 +90,7 @@ ggplot(parameters, aes(x=year, y=N50.))+geom_line(size=0.75) +
   geom_point (size=2) + xlab("Year") +
   ylab("Terminal Run Abundance (N)") +annotate("text",x = 1977, y = 60000, label="(c)", family="Arial" ,size=6) +
   geom_ribbon(aes(ymin=N2.5., ymax=N97.5.), alpha=0.20) +
-  scale_y_continuous(labels = comma,breaks = seq(0, 60000, 5000), limits = c(0, 60000)) +
+  scale_y_continuous(labels = comma,breaks = seq(0, 60000, 10000), limits = c(0, 60000)) +
   scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels) +
   theme(legend.position = "none") -> plot2
 
@@ -111,9 +110,9 @@ ggsave(out.file, dpi = 500, height = 8, width = 9, units = "in")
 out.file <- paste0("output/rjags_base_case/processed/returns_est.png")
 maxY<-max(parameters$R97.5., na.rm=TRUE)*1.5
 ggplot(parameters, aes(x=year, y=(R50.))) + geom_line(size=0.75) + 
-  geom_point(size=2)+ylab("Returns (R)") + xlab("") + annotate("text",x = 1977, y= 60000, label="(a)", family="Arial" ,size=6) +
+  geom_point(size=2)+ylab("Returns (R)") + xlab("") + annotate("text",x = 1977, y= 70000, label="(a)", family="Arial" ,size=6) +
   geom_ribbon(aes(ymin=R2.5., ymax=R97.5.), alpha=0.20) +
-  scale_y_continuous(labels = comma,breaks = seq(0, 60000, 5000), limits = c(0, 60000)) +
+  scale_y_continuous(labels = comma,breaks = seq(0, 70000, 10000), limits = c(0, 70000)) +
   scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels) +
   theme(legend.position = "none") -> plot1
 
@@ -121,10 +120,10 @@ ggplot(parameters, aes(x=year, y=(R50.))) + geom_line(size=0.75) +
 maxY<-max(parameters$log.resid97.5., na.rm=TRUE)+0.5
 minY<-min(parameters$log.resid2.5., na.rm=TRUE)-0.5
 ggplot(parameters, aes(x=year, y=log.resid50.))+geom_line(size=0.75)+geom_point (size=2) + 
-  ylab("Productivity Residuals")+xlab("Brood Year") + annotate("text",x = 1977, y=1.00, label="(b)", family="Arial" ,size=6) +
+  ylab("Productivity Residuals")+xlab("Brood Year") + annotate("text",x = 1977, y=1.5, label="(b)", family="Arial" ,size=6) +
   geom_ribbon(aes(ymin=parameters$log.resid2.5., ymax=parameters$log.resid97.5.), alpha=0.20) +
   geom_line(aes(y=0), colour="black", size=0.5) +
-  scale_y_continuous(breaks = seq(-1, 1, 0.25), limits = c(-1, 1)) +
+  scale_y_continuous(breaks = seq(-2.5, 2, 0.50), limits = c(-2.5, 1.5)) +
   scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels) +
   theme(legend.position = "none") -> plot2
 cowplot::plot_grid(plot1,plot2,  align = "v", nrow = 2, ncol=1) 
@@ -164,7 +163,6 @@ ggplot(data,aes(x=year, y=Nya, fill=as.factor(Age))) +
   scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels, limits = c(1977, 2022)) -> plot3
 cowplot::plot_grid(plot1,plot2,plot3, align = "v", nrow = 3, ncol=1) 
 ggsave(out.file, dpi = 500, height = 11, width = 8, units = "in")
-
 
 # HORSETAIL PLOTS----
 num <- nrow(QM)
@@ -238,8 +236,8 @@ ggplot(data=dataset1, aes(x=Escapement, y=Median, group=variable)) +
   geom_ribbon(aes(ymin = q10, ymax = q90, group=51), alpha=.08) +
   xlab("Spawners (S)") +
   ylab("Recruits (R)") +
-  scale_y_continuous(labels = comma,breaks = seq(0, 40000, 5000), limits = c(0, 40000)) +
-  scale_x_continuous(labels = comma,breaks = seq(0, 40000, 5000), limits = c(0, 40000)) +
+  scale_y_continuous(labels = comma,breaks = seq(0, 50000, 5000), limits = c(0, 50000)) +
+  scale_x_continuous(labels = comma,breaks = seq(0, 50000, 5000), limits = c(0, 50000)) +
   geom_line(aes(x=Escapement, y=Escapement, group=51),linetype="solid", size=1) +
   geom_point(data=dataset1, aes(x=x.t, y=y.t, group=52),pch=16, size=1) +
   geom_errorbar(data=dataset1, aes(x=Escapement1, ymax=R97.5., ymin=R2.5., group=52), width=0.2,linetype = 1, colour="grey70") +
@@ -248,7 +246,6 @@ ggplot(data=dataset1, aes(x=Escapement, y=Median, group=variable)) +
   geom_text(size=3, data=dataset1, aes(x=Escapement1, y=Recruitment, group=52, label=year,family="Times", 
                                      hjust = -0.1, vjust= -0.4)) 
 ggsave(out.file, dpi = 500, height = 6, width = 8, units = "in")
-
 
 # ESCAPEMENT ESTIMATES
 parameters <- read.csv("output/rjags_base_case/parameters.csv") 
@@ -259,7 +256,7 @@ parameters %>%
 
 ggplot(parameter_set, aes(x=year, y=S50.)) + 
   geom_line(size=0.75) + geom_point (size=2) + ylab("Escapement (S)") + xlab("Year") +
-  scale_y_continuous(labels = comma,breaks = seq(0, 15000, 2500), limits = c(0, 15000)) + 
+  scale_y_continuous(labels = comma,breaks = seq(0, 30000, 5000), limits = c(0, 30000)) + 
   scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels, limits = c(1977, 2020)) +                    
   theme(legend.position = "topright") +
   geom_hline(yintercept = SMAX, colour="grey40", size=1, linetype=4) +
@@ -279,6 +276,7 @@ ggplot(parameters, aes(x=year, y=lnRS))+
   geom_point(size=4, color = "black", shape = 18) +
   xlab("Brood Year") + 
   ylab("ln(R/S)") +
+  scale_y_continuous(breaks = seq(-2, 2, 0.5), limits = c(-2, 2)) +
   scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels, limits = c(1980, 2020))+
   geom_label((aes(label=year)))+ 
   geom_smooth(method="gam", formula=y~s(x, k=10),colour="black", 
@@ -293,6 +291,8 @@ parameters %>%
          S = (S50.))-> parameters
 ggplot(parameters, aes(x=S, y=lnRS))+
   geom_point(size=4, color = "black", shape = 18) +
+  scale_y_continuous(breaks = seq(-2, 2, 0.5), limits = c(-2, 2)) +
+  scale_x_continuous(labels = comma,breaks = seq(0, 20000, 5000), limits = c(0, 20000)) + 
   xlab("Spawners (S)") + 
   ylab("ln(R/S)") +
   geom_label((aes(label=year)))+ 
