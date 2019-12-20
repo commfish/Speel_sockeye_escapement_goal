@@ -40,7 +40,7 @@ gel <- as.data.frame(gelman.diag(post, multivariate=F)[[1]])
 poor.threshold = 1.2 #values less than 1.2 are generally considered converged
 gel %>%
   rownames_to_column('variable') %>%
-  mutate(point_estimate = "Point est.") %>%
+  rename(point_estimate = "Point est.") %>%
   mutate (converge = ifelse(point_estimate < poor.threshold, "true", "false")) %>%
   write.csv(., file= paste0(out.path,"/gelman.csv") )   
 
