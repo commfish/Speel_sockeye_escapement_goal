@@ -3,6 +3,7 @@
 library(tidyverse)
 library(dplyr)
 library(tidyr)
+#rawdat<-as.data.frame(read.csv("data/Speel_sockeye_1986_onward.csv",header=T)) 
 rawdat<-as.data.frame(read.csv("data/Speel_sockeye.csv",header=T)) 
 nyrs<-as.numeric(length(rawdat$year)) 
 fyr<-min(rawdat$year) 

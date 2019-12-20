@@ -2,14 +2,14 @@
 # i and z act as ways to change range of escapement based on stock size
 
 # input values below based on stats output
-LowerB <- 3000  #lower bound of recommended escapement goal range
-UpperB <- 7000 #upper bound of recommended escapement goal range
-SMSY <- 4226  #Lambert W from lambert file
-UMSY <- 0.33  #median from staquants file
-SMAX <- 13328  #median from staquants file
-SEQ <- 12557 #median from staquants file
-lnalpha.c <-  1.25 #median from staquants file
-beta <- 7.50318E-05  #median from staquants file
+LowerB <- 4000  #lower bound of recommended escapement goal range
+UpperB <- 8000 #upper bound of recommended escapement goal range
+SMSY <- 6302  #Lambert W from lambert file
+UMSY <- 0.54  #median from staquants file
+SMAX <- 11646  #median from staquants file
+SEQ <- 15515 #median from staquants file
+lnalpha.c <-  1.3217 #median from staquants file
+beta <- 8.58679E-05  #median from staquants file
 
 # load----
 library(tidyverse)
@@ -58,8 +58,8 @@ profile(i=10, z=50, xa.start=0, xa.end=8000,lnalpha.c, beta) #can change i,z, xa
 # read in data----
 Speel_sockeye <- read.csv("data/Speel_sockeye.csv") 
 p_q_Nya<- read.csv("output/rjags_base_case/p_q_Nya.csv") 
+CI <- read.csv("output/rjags_base_case/processed/CI.csv") 
 QM <- read.csv("output/rjags_base_case/processed/QM.csv")
-CI<- read.csv("output/rjags_base_case/processed/CI.csv")
 coda <- read.csv("output/rjags_base_case/coda.csv") 
 parameters <- read.csv("output/rjags_base_case/parameters.csv") 
 
@@ -88,9 +88,9 @@ ggplot(parameters, aes(x=year, y=(S50.))) +
 maxY<-max(parameters$N97.5., na.rm=TRUE)*1.5
 ggplot(parameters, aes(x=year, y=N50.))+geom_line(size=0.75) + 
   geom_point (size=2) + xlab("Year") +
-  ylab("Terminal Run Abundance (N)") +annotate("text",x = 1977, y = 60000, label="(c)", family="Arial" ,size=6) +
+  ylab("Terminal Run Abundance (N)") +annotate("text",x = 1977, y = 50000, label="(c)", family="Arial" ,size=6) +
   geom_ribbon(aes(ymin=N2.5., ymax=N97.5.), alpha=0.20) +
-  scale_y_continuous(labels = comma,breaks = seq(0, 60000, 10000), limits = c(0, 60000)) +
+  scale_y_continuous(labels = comma,breaks = seq(0, 50000, 10000), limits = c(0, 50000)) +
   scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels) +
   theme(legend.position = "none") -> plot2
 
@@ -110,9 +110,9 @@ ggsave(out.file, dpi = 500, height = 8, width = 9, units = "in")
 out.file <- paste0("output/rjags_base_case/processed/returns_est.png")
 maxY<-max(parameters$R97.5., na.rm=TRUE)*1.5
 ggplot(parameters, aes(x=year, y=(R50.))) + geom_line(size=0.75) + 
-  geom_point(size=2)+ylab("Returns (R)") + xlab("") + annotate("text",x = 1977, y= 70000, label="(a)", family="Arial" ,size=6) +
+  geom_point(size=2)+ylab("Returns (R)") + xlab("") + annotate("text",x = 1977, y= 90000, label="(a)", family="Arial" ,size=6) +
   geom_ribbon(aes(ymin=R2.5., ymax=R97.5.), alpha=0.20) +
-  scale_y_continuous(labels = comma,breaks = seq(0, 70000, 10000), limits = c(0, 70000)) +
+  scale_y_continuous(labels = comma,breaks = seq(0, 90000, 10000), limits = c(0, 90000)) +
   scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels) +
   theme(legend.position = "none") -> plot1
 

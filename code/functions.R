@@ -75,22 +75,22 @@ profile <-function(i,z,xa.start, xa.end,lnalpha.c, beta){
   write.csv(Y,("output/rjags_base_case/processed/Y.csv"), row.names=FALSE)
   
 # confidence intervals ----
- # dat10 %>%
- #    summarise_all(funs(median = median, 
- #                       q95=quantile(., 0.95, na.rm=T), 
- #                       q90=quantile(., 0.90, na.rm=T),
- #                       q10=quantile(., 0.10, na.rm=T),
- #                       q5=quantile(., 0.05, na.rm=T))) -> mq
- # names(mq) <- c(rep(('Median'),length(x)+1), 
- #                 rep(('q95'),length(x)+1), 
- #                 rep(('q90'),length(x)+1), 
- #                 rep(('q10'),length(x)+1), 
- #                 rep(('q5'),length(x)+1))
+  dat10 %>%
+     summarise_all(funs(median = median, 
+                        q95=quantile(., 0.95, na.rm=T), 
+                        q90=quantile(., 0.90, na.rm=T),
+                        q10=quantile(., 0.10, na.rm=T),
+                        q5=quantile(., 0.05, na.rm=T))) -> mq
+  names(mq) <- c(rep(('Median'),length(x)+1), 
+                  rep(('q95'),length(x)+1), 
+                  rep(('q90'),length(x)+1), 
+                  rep(('q10'),length(x)+1), 
+                  rep(('q5'),length(x)+1))
   
-  #CI <- data.frame(measure = names(mq), value = as.numeric(mq[1,]), Escapement=rep(c(0,x), length(unique(names(mq)))))
-  #CI <- spread(CI, measure, value)
-  #CI <- CI[c("q95", "q90", "Median","q10", "q5", "Escapement")]
-  #write.csv(CI,("output/rjags_base_case/processed/CI.csv"), row.names=FALSE)
+  CI <- data.frame(measure = names(mq), value = as.numeric(mq[1,]), Escapement=rep(c(0,x), length(unique(names(mq)))))
+  CI <- spread(CI, measure, value)
+  CI <- CI[c("q95", "q90", "Median","q10", "q5", "Escapement")]
+  write.csv(CI,("output/rjags_base_case/processed/CI.csv"), row.names=FALSE)
   
 read.csv("output/rjags_base_case/processed/Y.csv") -> Y
   Y %>% 
@@ -141,7 +141,7 @@ read.csv("output/rjags_base_case/processed/Y.csv") -> Y
     scale_x_continuous(labels = comma, breaks = seq(0, 14000, 2000), limits = c(0, 14000),expand=c(0,0))+
     scale_y_continuous(breaks = seq(0, 1, 0.25), limits = c(0, 1))+
     scale_linetype_discrete(name = "Percent of Max.") + xlab('Escapement (S)')+
-    facet_grid(sra ~ .) +geom_vline(xintercept=4000 , lwd=1.25,colour="grey30") -> plot1
+    facet_grid(sra ~ .) +geom_vline(xintercept=6302  , lwd=1.25,colour="grey30") -> plot1
   
   ggplot(fig_data2, aes(x = Escapement, y = Probability, linetype = max_pct)) +
     annotate("rect", xmin = 3000, xmax = 8000, ymin = 0, ymax = 1,
@@ -150,7 +150,7 @@ read.csv("output/rjags_base_case/processed/Y.csv") -> Y
     geom_line() + xlab('Escapement (S)') +
     scale_x_continuous(labels = comma, breaks = seq(0, 14000, 2000), limits = c(0, 14000),expand=c(0,0))+
     scale_linetype_discrete(name = "Percent of Max.") + 
-    facet_grid(sra ~ .) +geom_vline(xintercept=4000 , lwd=1.25,colour="grey30")-> plot2
+    facet_grid(sra ~ .) +geom_vline(xintercept=6302 , lwd=1.25,colour="grey30")-> plot2
   
   ggplot(fig_data3, aes(x = Escapement, y = Probability, linetype = max_pct)) +
     annotate("rect", xmin = 3000, xmax = 8000, ymin = 0, ymax = 1,
@@ -159,7 +159,7 @@ read.csv("output/rjags_base_case/processed/Y.csv") -> Y
     geom_line() + xlab('Escapement (S)') +  
     scale_x_continuous(labels = comma, breaks = seq(0, 14000, 2000), limits = c(0, 14000),expand=c(0,0))+
     scale_linetype_discrete(name = "Percent of Max.") +
-    facet_grid(sra ~ .) +geom_vline(xintercept=4000 , lwd=1.25,colour="grey30") -> plot3
+    facet_grid(sra ~ .) +geom_vline(xintercept=6302  , lwd=1.25,colour="grey30") -> plot3
   cowplot::plot_grid(plot2,plot3,plot1, align = "v", nrow = 3, ncol=1) 
   ggsave("output/rjags_base_case/processed/profiles.png", dpi = 500, height = 8, width = 9, units = "in")
   
