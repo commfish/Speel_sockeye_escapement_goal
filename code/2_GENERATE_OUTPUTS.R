@@ -17,7 +17,7 @@ windowsFonts(Times=windowsFont("Arial"))
 
 parameters <- c('alpha','beta', 'alpha.c', 'lnalpha','lnalpha.c','phi',
                 'sigma.R','log.resid.0', 'mean.log.R0','log.resid',
-                'S','R','N','pi','h.b','N.ya','mu.HB',
+                'S','R','N','pi','H.B','N.ya','mu.HB',
                 'p','q', 'S.max','D.sum','sigma.R0',
                 'S.eq.c', 'U.msy.c', 'S.msy.c', 'B.sum')
 
