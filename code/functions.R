@@ -135,7 +135,7 @@ read.csv("output/rjags_base_case/processed/Y.csv") -> Y
     
 # PROFILES----
   ggplot(fig_data1, aes(x = Escapement, y = Probability, linetype = max_pct)) + 
-    annotate("rect", xmin = 3000, xmax = 8000, ymin = 0, ymax = 1,
+    annotate("rect", xmin = 4000, xmax = 9000, ymin = 0, ymax = 1,
              inherit.aes = FALSE, fill = "grey90", alpha = 0.9) +
     geom_line() + theme(legend.position= "none") +
     scale_x_continuous(labels = comma, breaks = seq(0, 14000, 2000), limits = c(0, 14000),expand=c(0,0))+
@@ -144,7 +144,7 @@ read.csv("output/rjags_base_case/processed/Y.csv") -> Y
     facet_grid(sra ~ .) +geom_vline(xintercept=6302  , lwd=1.25,colour="grey30") -> plot1
   
   ggplot(fig_data2, aes(x = Escapement, y = Probability, linetype = max_pct)) +
-    annotate("rect", xmin = 3000, xmax = 8000, ymin = 0, ymax = 1,
+    annotate("rect", xmin = 4000, xmax = 9000, ymin = 0, ymax = 1,
              inherit.aes = FALSE, fill = "grey90", alpha = 0.9) +
     theme(legend.position=c(0.90,0.85), legend.title = element_blank()) +
     geom_line() + xlab('Escapement (S)') +
@@ -153,7 +153,7 @@ read.csv("output/rjags_base_case/processed/Y.csv") -> Y
     facet_grid(sra ~ .) +geom_vline(xintercept=6302 , lwd=1.25,colour="grey30")-> plot2
   
   ggplot(fig_data3, aes(x = Escapement, y = Probability, linetype = max_pct)) +
-    annotate("rect", xmin = 3000, xmax = 8000, ymin = 0, ymax = 1,
+    annotate("rect", xmin = 4000, xmax = 9000, ymin = 0, ymax = 1,
              inherit.aes = FALSE, fill = "grey90", alpha = 0.9) +
   theme(legend.position= "none") +
     geom_line() + xlab('Escapement (S)') +  
