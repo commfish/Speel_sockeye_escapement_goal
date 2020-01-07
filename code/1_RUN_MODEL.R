@@ -35,7 +35,7 @@ library(extrafont)
 # "explore" version takes ~10min with the current settings.
 out.label <-  "rjags_base_case" 
 package.use <- "rjags"  #"rjags"  or "R2jags"
-jags.settings <- "explore"  # "test" or "explore" or full" 
+jags.settings <- "test"  # "test" or "explore" or full" 
 sensitivity.analysis <- 0 #0 1 is yes and 0 is no
 
 # source the model file (this reads in a function called "mod")
@@ -66,7 +66,7 @@ if(jags.settings == "explore"){
 
 if(jags.settings == "full"){
   n.adapt.use <- 10000  ; n.iter.use <- 1000000    #1,000,000 per chain; 3 chains; thin by 1000
-  n.burnin.use <- 10000  # consider increasing this?
+  n.burnin.use <- 100000  
   thin.use = 1000; by.use <- 1000 # this is just for the progress bar 
 }
 
