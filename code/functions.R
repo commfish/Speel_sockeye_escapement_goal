@@ -1,3 +1,4 @@
+# geom_vline(xintercept=6276); need to update with SMSY value
 profile <-function(i,z,xa.start, xa.end,lnalpha.c, beta){ 
   xa = seq(xa.start, xa.end, by=i) 
   x =(xa+i)*z
@@ -141,7 +142,7 @@ read.csv("output/rjags_base_case/processed/Y.csv") -> Y
     scale_x_continuous(labels = comma, breaks = seq(0, 14000, 2000), limits = c(0, 14000),expand=c(0,0))+
     scale_y_continuous(breaks = seq(0, 1, 0.25), limits = c(0, 1))+
     scale_linetype_discrete(name = "Percent of Max.") + xlab('Escapement (S)')+
-    facet_grid(sra ~ .) +geom_vline(xintercept=6302  , lwd=1.25,colour="grey30") -> plot1
+    facet_grid(sra ~ .) +geom_vline(xintercept=6276  , lwd=1.25,colour="grey30") -> plot1
   
   ggplot(fig_data2, aes(x = Escapement, y = Probability, linetype = max_pct)) +
     annotate("rect", xmin = 4000, xmax = 9000, ymin = 0, ymax = 1,
@@ -150,7 +151,7 @@ read.csv("output/rjags_base_case/processed/Y.csv") -> Y
     geom_line() + xlab('Escapement (S)') +
     scale_x_continuous(labels = comma, breaks = seq(0, 14000, 2000), limits = c(0, 14000),expand=c(0,0))+
     scale_linetype_discrete(name = "Percent of Max.") + 
-    facet_grid(sra ~ .) +geom_vline(xintercept=6302 , lwd=1.25,colour="grey30")-> plot2
+    facet_grid(sra ~ .) +geom_vline(xintercept=6276 , lwd=1.25,colour="grey30")-> plot2
   
   ggplot(fig_data3, aes(x = Escapement, y = Probability, linetype = max_pct)) +
     annotate("rect", xmin = 4000, xmax = 9000, ymin = 0, ymax = 1,
@@ -159,7 +160,7 @@ read.csv("output/rjags_base_case/processed/Y.csv") -> Y
     geom_line() + xlab('Escapement (S)') +  
     scale_x_continuous(labels = comma, breaks = seq(0, 14000, 2000), limits = c(0, 14000),expand=c(0,0))+
     scale_linetype_discrete(name = "Percent of Max.") +
-    facet_grid(sra ~ .) +geom_vline(xintercept=6302  , lwd=1.25,colour="grey30") -> plot3
+    facet_grid(sra ~ .) +geom_vline(xintercept=6276  , lwd=1.25,colour="grey30") -> plot3
   cowplot::plot_grid(plot2,plot3,plot1, align = "v", nrow = 3, ncol=1) 
   ggsave("output/rjags_base_case/processed/profiles.png", dpi = 500, height = 8, width = 9, units = "in")
   
