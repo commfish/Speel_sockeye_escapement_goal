@@ -219,9 +219,9 @@ write.csv(p_q_Nya, file= paste0(out.path,"/p_q_Nya.csv"))
 data.frame(quants) %>% 
   rownames_to_column('variable') -> quants
 quants %>%
-  filter(str_detect(variable, "h.b")) %>% 
+  filter(str_detect(variable, "H.B")) %>% 
   rename_at(vars(starts_with("X")), 
-            funs(str_replace(., "X", "h.b"))) %>%
+            funs(str_replace(., "X", "H.B"))) %>%
   dplyr::select(-c(variable))-> df
 new.df <- data.frame(
   year = rep(c(1983:2019),1))
@@ -361,14 +361,12 @@ coda %>%
 coda %>% 
   dplyr::select(Umsy) -> Umsy
 
-# density plot
 out.file <- paste0("output/rjags_base_case/density.png")
 options(scipen=999)
 ggplot(Smsy, aes(x=Smsy, fill=Smsy, color = Smsy)) +
   geom_density(fill ="#999999", alpha=0.5)+ annotate("text",x = 0, y=0.0006, label="a)", family="Arial" ,size=6) +
   scale_color_manual(values=c("#999999"))+
   scale_fill_manual(values=c("#999999"))+
-  #geom_vline(xintercept = 43857,linetype = "longdash" ) +
   labs(x="Smsy",y="Density") + theme_set(theme_bw(base_size=14,base_family=
                                              'Arial')+
                                     theme(panel.grid.major = element_blank(),
@@ -378,7 +376,7 @@ ggplot(Smsy, aes(x=Smsy, fill=Smsy, color = Smsy)) +
 ggplot(Umsy, aes(x=Umsy, fill=Umsy)) +
   geom_density(fill ="#999999", alpha=0.5)+ annotate("text",x = 0, y=5, label="b)", family="Arial" ,size=6) +
   scale_color_manual(values=c("#999999"))+
-  scale_fill_manual(values=c("#999999"))+#geom_vline(xintercept = 0.75,linetype = "longdash" ) +
+  scale_fill_manual(values=c("#999999"))+
   labs(x="Umsy",y="Density") + theme_set(theme_bw(base_size=14,base_family=
                                                       'Arial')+
                                              theme(panel.grid.major = element_blank(),
@@ -407,78 +405,78 @@ write.csv(autocorr.summary, file= paste0(out.path,"/autocorr.csv"))
 
 #trace and density plots----
 parameters <- c('S')
-pdf("state_space_model/output/rjags_Explore_BaseCase/density2.pdf",height=10, width=8,onefile=F)
+pdf("output/rjags_base_case/density2.pdf",height=10, width=8,onefile=F)
 denplot(post, parms = c(parameters))
 dev.off()
-pdf("state_space_model/output/rjags_Explore_BaseCase/trace2.pdf",height=10, width=8,onefile=F)
+pdf("output/rjags_base_case/trace2.pdf",height=10, width=8,onefile=F)
 traplot(post, parms = c(parameters))
 dev.off()
 parameters <- c('R')
-pdf("state_space_model/output/rjags_Explore_BaseCase/density3.pdf",height=10, width=8,onefile=F)
+pdf("output/rjags_base_case/density3.pdf",height=10, width=8,onefile=F)
 denplot(post, parms = c(parameters))
 dev.off()
-pdf("state_space_model/output/rjags_Explore_BaseCase/trace3.pdf",height=10, width=8,onefile=F)
+pdf("output/rjags_base_case/trace3.pdf",height=10, width=8,onefile=F)
 traplot(post, parms = c(parameters))
 dev.off()
 parameters <- c('N')
-pdf("state_space_model/output/rjags_Explore_BaseCase/density4.pdf",height=10, width=8,onefile=F)
+pdf("output/rjags_base_case/density4.pdf",height=10, width=8,onefile=F)
 denplot(post, parms = c(parameters))
 dev.off()
-pdf("state_space_model/output/rjags_Explore_BaseCase/trace4.pdf",height=10, width=8,onefile=F)
+pdf("output/rjags_base_case/trace4.pdf",height=10, width=8,onefile=F)
 traplot(post, parms = c(parameters))
 dev.off()
 parameters <- c('p')
-pdf("state_space_model/output/rjags_Explore_BaseCase/density5.pdf",height=10, width=8,onefile=F)
+pdf("output/rjags_base_case/density5.pdf",height=10, width=8,onefile=F)
 denplot(post, parms = c(parameters))
 dev.off()
-pdf("state_space_model/output/rjags_Explore_BaseCase/trace5.pdf",height=10, width=8,onefile=F)
+pdf("output/rjags_base_case/trace5.pdf",height=10, width=8,onefile=F)
 traplot(post, parms = c(parameters))
 dev.off()
 parameters <- c('q')
-pdf("state_space_model/output/rjags_Explore_BaseCase/density6.pdf",height=10, width=8,onefile=F)
+pdf("output/rjags_base_case/density6.pdf",height=10, width=8,onefile=F)
 denplot(post, parms = c(parameters))
 dev.off()
-pdf("state_space_model/output/rjags_Explore_BaseCase/trace6.pdf",height=10, width=8,onefile=F)
+pdf("output/rjags_base_case/trace6.pdf",height=10, width=8,onefile=F)
 traplot(post, parms = c(parameters))
 dev.off()
 
 parameters <- c('phi')
-pdf("state_space_model/output/rjags_Explore_BaseCase/density6.pdf",height=10, width=8,onefile=F)
+pdf("output/rjags_base_case/density6.pdf",height=10, width=8,onefile=F)
 denplot(post, parms = c(parameters))
 dev.off()
-pdf("state_space_model/output/rjags_Explore_BaseCase/trace6.pdf",height=10, width=8,onefile=F)
+pdf("output/rjags_base_case/trace6.pdf",height=10, width=8,onefile=F)
 traplot(post, parms = c(parameters))
 dev.off()
 
 parameters <- c('S.msy.c')
-pdf("state_space_model/output/rjags_Explore_BaseCase/density7.pdf",height=10, width=8,onefile=F)
+pdf("output/rjags_base_case/density7.pdf",height=10, width=8,onefile=F)
 denplot(post, parms = c(parameters))
 dev.off()
-pdf("state_space_model/output/rjags_Explore_BaseCase/trace7.pdf",height=10, width=8,onefile=F)
+pdf("output/rjags_base_case/trace7.pdf",height=10, width=8,onefile=F)
 traplot(post, parms = c(parameters))
 dev.off()
 
 parameters <- c('lnalpha.c')
-pdf("state_space_model/output/rjags_Explore_BaseCase/density8.pdf",height=10, width=8,onefile=F)
+pdf("output/rjags_base_case/density8.pdf",height=10, width=8,onefile=F)
 denplot(post, parms = c(parameters))
 dev.off()
-pdf("state_space_model/output/rjags_Explore_BaseCase/trace8.pdf",height=10, width=8,onefile=F)
+pdf("output/rjags_base_case/trace8.pdf",height=10, width=8,onefile=F)
 traplot(post, parms = c(parameters))
 dev.off()
 
 parameters <- c('beta')
-pdf("state_space_model/output/rjags_Explore_BaseCase/density9.pdf",height=10, width=8,onefile=F)
+pdf("output/rjags_base_case/density9.pdf",height=10, width=8,onefile=F)
 denplot(post, parms = c(parameters))
 dev.off()
-pdf("state_space_model/output/rjags_Explore_BaseCase/trace9.pdf",height=10, width=8,onefile=F)
+pdf("output/rjags_base_case/trace9.pdf",height=10, width=8,onefile=F)
 traplot(post, parms = c(parameters))
 dev.off()
 
 parameters <- c('D.sum')
-pdf("state_space_model/output/rjags_Explore_BaseCase/density10.pdf",height=10, width=8,onefile=F)
+pdf("output/rjags_base_case/density10.pdf",height=10, width=8,onefile=F)
 denplot(post, parms = c(parameters))
 dev.off()
-pdf("state_space_model/output/rjags_Explore_BaseCase/trace10.pdf",height=10, width=8,onefile=F)
+pdf("output/rjags_base_case/trace10.pdf",height=10, width=8,onefile=F)
 traplot(post, parms = c(parameters))
 dev.off()
 
