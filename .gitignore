@@ -2,7 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
-
+.Rproj
 
 # File types
 *.tiff
