@@ -4,12 +4,12 @@
 # input values below based on stats output
 LowerB <- 4000  #lower bound of recommended escapement goal range
 UpperB <- 9000 #upper bound of recommended escapement goal range
-SMSY <- 6302  #Lambert W from lambert file
-UMSY <- 0.54  #median from staquants file
-SMAX <- 11646  #median from staquants file
-SEQ <- 15515 #median from staquants file
-lnalpha.c <-  1.3217 #median from staquants file
-beta <- 8.58679E-05  #median from staquants file
+SMSY <- 6276  #Lambert W from lambert file
+UMSY <- 0.55  #median from staquants file
+SMAX <- 11557  #median from staquants file
+SEQ <- 15444 #median from staquants file
+lnalpha.c <-  1.3328 #median from staquants file
+beta <- 8.65258E-05  #median from staquants file
 
 # load----
 library(tidyverse)
