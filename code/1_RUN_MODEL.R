@@ -35,7 +35,7 @@ library(extrafont)
 # "explore" version takes ~10min with the current settings.
 out.label <-  "rjags_base_case" 
 package.use <- "rjags"  #"rjags"  or "R2jags"
-jags.settings <- "test"  # "test" or "explore" or full" 
+jags.settings <- "full"  # "test" or "explore" or full" 
 sensitivity.analysis <- 0 #0 1 is yes and 0 is no
 
 # source the model file (this reads in a function called "mod")
