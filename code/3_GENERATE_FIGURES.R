@@ -22,6 +22,7 @@ library(scales)
 library(dplyr)
 library(extrafont)
 library("devtools")
+library(zoo)
 # font_import()
 
 windowsFonts(Times=windowsFont("TT Arial"))
@@ -78,10 +79,10 @@ maxY<-max(parameters$S97.5., na.rm=TRUE)*1.5
 ggplot(parameters, aes(x=year, y=(S50.))) +
   geom_line(size=0.75)+ geom_point (size=2)+ylab("Escapement (S)") + xlab("") +
   geom_ribbon(aes(ymin=(parameters$S2.5.), ymax=(parameters$S97.5.)), alpha=0.20) +
-  scale_y_continuous(labels = comma,breaks = seq(0, 40000, 5000), limits = c(0, 40000)) +
+  scale_y_continuous(labels = comma,breaks = seq(0, 30000, 5000), limits = c(0, 30000)) +
   scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels) +
   theme(legend.position = "none") +
-  geom_line(aes(y=SMSY), colour="grey40", size=1, linetype=2)+
+  geom_line(aes(y=SMSY), colour="grey70", size=1, linetype=2)+
   annotate("text",x = 1977, y= 30000, label="(a)", family="Arial" ,size=6) -> plot1
 
 # terminal run abundance   
@@ -119,10 +120,11 @@ ggplot(parameters, aes(x=year, y=(R50.))) + geom_line(size=0.75) +
 # Ricker productivity residuals
 maxY<-max(parameters$log.resid97.5., na.rm=TRUE)+0.5
 minY<-min(parameters$log.resid2.5., na.rm=TRUE)-0.5
-ggplot(parameters, aes(x=year, y=log.resid50.))+geom_line(size=0.75)+geom_point (size=2) + 
+ggplot(parameters, aes(x=year, y=log.resid50.))+#geom_line(size=0.75)+
+  geom_point (size=2) + 
   ylab("Productivity Residuals")+xlab("Brood Year") + annotate("text",x = 1977, y=1.5, label="(b)", family="Arial" ,size=6) +
   geom_ribbon(aes(ymin=parameters$log.resid2.5., ymax=parameters$log.resid97.5.), alpha=0.20) +
-  geom_line(aes(y=0), colour="black", size=0.5) +
+  geom_line(aes(y=0), colour="black", size=0.5, lty=2) +geom_line(aes(y=rollmean(log.resid50., 5, na.pad=TRUE, align ="right"))) +
   scale_y_continuous(breaks = seq(-2.5, 2, 0.50), limits = c(-2.5, 1.5)) +
   scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels) +
   theme(legend.position = "none") -> plot2
@@ -255,14 +257,17 @@ parameters %>%
   out.file <- paste0("output/rjags_base_case/processed/hist_esc.png")
 
 ggplot(parameter_set, aes(x=year, y=S50.)) + 
+  annotate("rect", ymin = 4000, ymax = 9000, xmin = 1977, xmax = 2020,
+           fill = "grey90", alpha = 0.9) +
   geom_line(size=0.75) + geom_point (size=2) + ylab("Escapement (S)") + xlab("Year") +
-  scale_y_continuous(labels = comma,breaks = seq(0, 30000, 5000), limits = c(0, 30000)) + 
+  scale_y_continuous(labels = comma,breaks = seq(0, 25000, 5000), limits = c(0, 25000)) + 
   scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels, limits = c(1977, 2020)) +                    
   theme(legend.position = "topright") +
-  geom_hline(yintercept = SMAX, colour="grey40", size=1, linetype=4) +
-  geom_hline(yintercept = SMSY, colour="grey40", size=1, linetype=2) +
-  geom_errorbar(aes(ymin=S2.5., ymax=S97.5.),size=0.5, linetype = "solid", colour="grey40", width=0.02) +
-  geom_hline(yintercept=SEQ, colour="grey50", size=1, linetype=1)
+  #geom_hline(yintercept = SMAX, colour="grey40", size=1, linetype=4) +
+  #geom_hline(yintercept = SMSY, colour="grey40", size=1, linetype=2) +
+  geom_errorbar(aes(ymin=S2.5., ymax=S97.5.),size=0.5, linetype = "solid", colour="grey40", width=0.02)
+  #geom_hline(yintercept=SEQ, colour="grey50", size=1, linetype=1)
+
 ggsave(out.file, dpi = 500, height = 6, width = 8, units = "in")
 
 # ln(R/S) versus year
