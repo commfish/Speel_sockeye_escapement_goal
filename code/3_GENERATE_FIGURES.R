@@ -54,7 +54,7 @@ theme_sleek <- function(base_size = 12, base_family = "Arial") {
 }
 theme_set(theme_sleek())
 
-profile(i=10, z=50, xa.start=0, xa.end=8000,lnalpha.c, beta) #can change i,z, xa.start, xa.end
+profile(i=10, z=10, xa.start=0, xa.end=8000,lnalpha.c, beta) #can change i,z, xa.start, xa.end
 
 # read in data----
 Speel_sockeye <- read.csv("data/Speel_sockeye.csv") 
