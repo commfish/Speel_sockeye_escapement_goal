@@ -15,7 +15,8 @@ beta <- 8.65258E-05  #median from staquants file
 library(tidyverse)
 library(cowplot)
 library(ggplot2)
-library(FNGr)
+devtools::install_github("commfish/fngr")
+library(fngr)
 library(gsl)
 library(FField)
 library(scales)
@@ -23,16 +24,17 @@ library(dplyr)
 library(extrafont)
 library("devtools")
 library(zoo)
-# font_import()
+extrafont::font_import()
 
-windowsFonts(Times=windowsFont("TT Arial"))
+windowsFonts(Times=windowsFont("TT Times New Roman"))
+theme_set(theme_report(base_size = 14))
 source('code/functions.r')
 
 if(!dir.exists(file.path("output", "rjags_base_case", "processed"))){dir.create(file.path("output", "rjags_base_case", "processed"))}
 
 # data----
 # loadfonts(device="win") #only need to do this once; takes awhile to run!
-coda <- read.csv("output/rjags_base_case/coda.csv") 
+coda <- read.csv("output/rjags_base_case_save_2012_2013_included/coda.csv") 
 coda  %>%
   mutate(S.eq.c = lnalpha.c/beta, 
                 S.msy.c = (1-lambert_W0(exp(1-lnalpha.c)))/beta, #Lambert W
@@ -42,18 +44,6 @@ coda  %>%
 
 # analysis----
 # create function for probability profiles and figures
-theme_sleek <- function(base_size = 12, base_family = "Arial") {
-  theme_light(base_size = 12, base_family = "Arial") +theme_bw()+
-    theme(
-      panel.grid.major = element_blank(),
-      panel.grid.minor = element_blank(),
-      panel.border = element_rect(fill = NA),
-      legend.key = element_rect(colour = NA, fill = NA),
-      legend.background = element_rect(colour = NA, fill = NA)
-    )
-}
-theme_set(theme_sleek())
-
 profile(i=10, z=10, xa.start=0, xa.end=8000,lnalpha.c, beta) #can change i,z, xa.start, xa.end
 
 # read in data----

@@ -1,8 +1,9 @@
 #Taku sockeye state space model
 #authors: Sara E Miller & Gottfried Pestal
 #contact: sara.miller@alaska.gov; 907-465-4245
-#Last edited: July 2019
+#Last edited: July 2020
 #must download program JAGS for this script to work
+# For the final model run, 2012-2013 were included in the data
 
 # warning: some of these packages mask commands, so need to specify the package when calling the fn
 # runjags::extract vs. tidyr::extract
