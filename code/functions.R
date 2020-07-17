@@ -206,7 +206,7 @@ ggplot(fig_data3, aes(x = Escapement, y = Probability, linetype = max_pct)) +
   scale_linetype_discrete(name = "Percent of Max.") +
   facet_grid(sra ~ .)  -> plot3
 cowplot::plot_grid(plot2,plot3,plot1, align = "v", nrow = 3, ncol=1) 
-ggsave("output/SEAK_report_english.png", dpi = 500, height = 7, width = 6, units = "in")}
+ggsave("output/rjags_base_case/processed/SEAK_report_english.png", dpi = 500, height = 7, width = 6, units = "in")}
 
 
 
