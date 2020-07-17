@@ -4,12 +4,13 @@
 # input values below based on stats output
 LowerB <- 4000  #lower bound of recommended escapement goal range
 UpperB <- 9000 #upper bound of recommended escapement goal range
-SMSY <- 6276  #Lambert W from lambert file
+SMSY <- 5946  #Lambert W from lambert file
 UMSY <- 0.55  #median from staquants file
-SMAX <- 11557  #median from staquants file
-SEQ <- 15444 #median from staquants file
-lnalpha.c <-  1.3328 #median from staquants file
-beta <- 8.65258E-05  #median from staquants file
+SMAX <- 10666  #median from staquants file
+SEQ <- 14782 #median from staquants file
+lnalpha.c <-  1.3632 #median from staquants file
+beta <- 9.37587E-05
+  #median from staquants file
 
 # load----
 library(tidyverse)
@@ -34,7 +35,7 @@ if(!dir.exists(file.path("output", "rjags_base_case", "processed"))){dir.create(
 
 # data----
 # loadfonts(device="win") #only need to do this once; takes awhile to run!
-coda <- read.csv("output/rjags_base_case_save_2012_2013_included/coda.csv") 
+coda <- read.csv("output/rjags_base_case/coda.csv") 
 coda  %>%
   mutate(S.eq.c = lnalpha.c/beta, 
                 S.msy.c = (1-lambert_W0(exp(1-lnalpha.c)))/beta, #Lambert W
@@ -73,13 +74,13 @@ ggplot(parameters, aes(x=year, y=(S50.))) +
   scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels) +
   theme(legend.position = "none") +
   geom_line(aes(y=SMSY), colour="grey70", size=1, linetype=2)+
-  annotate("text",x = 1977, y= 30000, label="(a)", family="Arial" ,size=6) -> plot1
+  annotate("text",x = 1977, y= 28000, label="(a)" ,size=6, family = "Times") -> plot1
 
 # terminal run abundance   
 maxY<-max(parameters$N97.5., na.rm=TRUE)*1.5
 ggplot(parameters, aes(x=year, y=N50.))+geom_line(size=0.75) + 
   geom_point (size=2) + xlab("Year") +
-  ylab("Terminal Run Abundance (N)") +annotate("text",x = 1977, y = 50000, label="(c)", family="Arial" ,size=6) +
+  ylab("Terminal Run Abundance (N)") +annotate("text",x = 1977, y = 48000, label="(c)" ,size=6, family = "Times") +
   geom_ribbon(aes(ymin=N2.5., ymax=N97.5.), alpha=0.20) +
   scale_y_continuous(labels = comma,breaks = seq(0, 50000, 10000), limits = c(0, 50000)) +
   scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels) +
@@ -89,7 +90,7 @@ ggplot(parameters, aes(x=year, y=N50.))+geom_line(size=0.75) +
 ggplot(parameters, aes(x=year, y=mu.HB50.))+geom_line(size=0.75)+geom_point (size=2)+ ylab("Harvest rate") +
   xlab("") +
   geom_ribbon(aes(ymin=mu.HB2.5., ymax=mu.HB97.5.), alpha=0.15) +
-  coord_cartesian(ylim=c(0,1)) + annotate("text",x = 1977, y=1.00, label="(b)", family="Arial", size=6) +
+  coord_cartesian(ylim=c(0,1)) + annotate("text",x = 1977, y=0.95, label="(b)", size=6, family = "Times") +
   scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels) +
   geom_line(aes(y=UMSY), colour="grey70", size=1, linetype=2) + theme(legend.position = "none") -> plot3
 
@@ -101,7 +102,7 @@ ggsave(out.file, dpi = 500, height = 8, width = 9, units = "in")
 out.file <- paste0("output/rjags_base_case/processed/returns_est.png")
 maxY<-max(parameters$R97.5., na.rm=TRUE)*1.5
 ggplot(parameters, aes(x=year, y=(R50.))) + geom_line(size=0.75) + 
-  geom_point(size=2)+ylab("Returns (R)") + xlab("") + annotate("text",x = 1977, y= 90000, label="(a)", family="Arial" ,size=6) +
+  geom_point(size=2)+ylab("Returns (R)") + xlab("") + annotate("text",x = 1977, y= 90000, label="(a)", size=8, family = "Times") +
   geom_ribbon(aes(ymin=R2.5., ymax=R97.5.), alpha=0.20) +
   scale_y_continuous(labels = comma,breaks = seq(0, 90000, 10000), limits = c(0, 90000)) +
   scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels) +
@@ -112,7 +113,7 @@ maxY<-max(parameters$log.resid97.5., na.rm=TRUE)+0.5
 minY<-min(parameters$log.resid2.5., na.rm=TRUE)-0.5
 ggplot(parameters, aes(x=year, y=log.resid50.))+#geom_line(size=0.75)+
   geom_point (size=2) + 
-  ylab("Productivity Residuals")+xlab("Brood Year") + annotate("text",x = 1977, y=1.5, label="(b)", family="Arial" ,size=6) +
+  ylab("Productivity Residuals")+xlab("Brood Year") + annotate("text",x = 1977, y=1.5, label="(b)", size=8, family = "Times") +
   geom_ribbon(aes(ymin=parameters$log.resid2.5., ymax=parameters$log.resid97.5.), alpha=0.20) +
   geom_line(aes(y=0), colour="black", size=0.5, lty=2) +geom_line(aes(y=rollmean(log.resid50., 5, na.pad=TRUE, align ="right"))) +
   scale_y_continuous(breaks = seq(-2.5, 2, 0.50), limits = c(-2.5, 1.5)) +
@@ -136,19 +137,19 @@ p_q_Nya %>%
 ggplot(data,aes(x=year, y=p, fill=as.factor(Age))) +
   geom_area(position=position_stack(reverse=TRUE)) + scale_fill_grey(start=0.1, end=0.8) +
   theme(legend.title=element_blank(),legend.position=c(0.90,0.86)) +
-  ylab("Age-at-Maturity Proportions") + xlab("") + annotate("text",x = 1977, y=1.00, label= "(a)", family="Arial" ,size=6) +
+  ylab("Age-at-Maturity Proportions") + xlab("") + annotate("text",x = 1977, y=1.00, label= "(a)" ,size=8, family = "Times") +
   scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels, limits = c(1977, 2022)) -> plot1  
 
 ggplot(data,aes(x=year, y=q, fill=as.factor(Age))) +
   geom_area(position=position_stack(reverse=FALSE)) +
-  scale_fill_grey(start=0.1, end=0.8) + annotate("text",x = 1977, y=1.00, label="(b)", family="Arial" ,size=6) +
+  scale_fill_grey(start=0.1, end=0.8) + annotate("text",x = 1977, y=1.00, label="(b)" ,size=8, family = "Times") +
   ylab("Age Composition Proportions") + xlab("") +
   theme(legend.title=element_blank(), legend.position="none") + geom_point(aes(x=year, y=age_comp), position='stack') +
   scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels, limits = c(1977, 2022)) -> plot2
 
 ggplot(data,aes(x=year, y=Nya, fill=as.factor(Age))) +
   geom_area(position=position_stack(reverse=TRUE)) + scale_fill_grey(start=0.1, end=0.8) +
-  ylab("Terminal Run by Age")+xlab("Year") + annotate("text",x = 1977, y=30000, label="(c)", family="Arial" ,size=6) +
+  ylab("Terminal Run by Age")+xlab("Year") + annotate("text",x = 1977, y=30000, label="(c)" ,size=8, family = "Times") +
   guides(fill = guide_legend(reverse=FALSE)) + 
   theme(legend.title=element_blank(), legend.position="none") +
   scale_y_continuous(labels = comma,breaks = seq(0, 30000, 5000), limits = c(0, 30000)) +

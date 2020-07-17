@@ -177,10 +177,10 @@ ggplot(qm, aes(Escapement, Median))+geom_line(size=1)+
 ggsave(out.file, dpi = 500, height = 4, width = 6, units = "in")
 
 # SEAK plot 
-ggplot(fig_data1, aes(x = Escapement, y = Probability, linetype = max_pct)) + ggtitle("c) Yield Profile") + 
+ggplot(fig_data1, aes(x = Escapement, y = Probability, linetype = max_pct)) + ggtitle("(c) Yield Profile") + 
   annotate("rect", xmin = 4000, xmax = 9000, ymin = 0, ymax = 1,
            inherit.aes = FALSE, fill = "grey80", alpha = 0.9) +
-  geom_line() +    theme(plot.title = element_text(size = 14, face = "bold"),
+  geom_line() +    theme(plot.title = element_text(size = 12, face = "bold"),
                          strip.text.y = element_text(size=0),legend.position= "none") +
   scale_x_continuous(labels = comma, breaks = seq(0, 14000, 2000), limits = c(0, 14000))+
   scale_y_continuous(breaks = seq(0, 1, 0.25), limits = c(0, 1))+
@@ -189,9 +189,9 @@ ggplot(fig_data1, aes(x = Escapement, y = Probability, linetype = max_pct)) + gg
 
 ggplot(fig_data2, aes(x = Escapement, y = Probability, linetype = max_pct)) + 
   annotate("rect", xmin = 4000, xmax = 9000, ymin = 0, ymax = 1,
-           inherit.aes = FALSE, fill = "grey80", alpha = 0.9) + ggtitle("a) Overfishing Profile") + 
-  theme(plot.title = element_text(size = 14, face = "bold"),
-        strip.text.y = element_text(size=0),legend.position=c(0.95,0.88), legend.title = element_blank()) +
+           inherit.aes = FALSE, fill = "grey80", alpha = 0.9) + ggtitle("(a) Overfishing Profile") + 
+  theme(plot.title = element_text(size = 12, face = "bold"),
+        strip.text.y = element_text(size=0),legend.position=c(0.92,0.86), legend.title = element_blank()) +
   geom_line() + xlab('Escapement (S)') +
   scale_x_continuous(labels = comma, breaks = seq(0, 14000, 2000), limits = c(0, 14000))+
   scale_linetype_discrete(name = "Percent of Max.") + 
@@ -199,14 +199,14 @@ ggplot(fig_data2, aes(x = Escapement, y = Probability, linetype = max_pct)) +
 
 ggplot(fig_data3, aes(x = Escapement, y = Probability, linetype = max_pct)) + 
   annotate("rect", xmin = 4000, xmax = 9000, ymin = 0, ymax = 1,
-           inherit.aes = FALSE, fill = "grey80", alpha = 0.9) + ggtitle("b) Recruitment Profile") + 
-  geom_line() + xlab('Escapement (S)') +   theme(plot.title = element_text(size = 14, face = "bold"),
+           inherit.aes = FALSE, fill = "grey80", alpha = 0.9) + ggtitle("(b) Recruitment Profile") + 
+  geom_line() + xlab('Escapement (S)') +   theme(plot.title = element_text(size = 12, face = "bold"),
                                                  strip.text.y = element_text(size=0),legend.position= "none") +
   scale_x_continuous(labels = comma, breaks = seq(0, 14000, 2000), limits = c(0, 14000))+
   scale_linetype_discrete(name = "Percent of Max.") +
   facet_grid(sra ~ .)  -> plot3
 cowplot::plot_grid(plot2,plot3,plot1, align = "v", nrow = 3, ncol=1) 
-ggsave("output/SEAK_report_english.png", dpi = 500, height = 8, width = 9, units = "in")}
+ggsave("output/SEAK_report_english.png", dpi = 500, height = 7, width = 6, units = "in")}
 
 
 
