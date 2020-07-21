@@ -1,4 +1,4 @@
-# Speel_sockeye_escapement_goal
+# Speel Lake Sockeye Salmon Escapement Goal
 Speel Lake sockeye salmon S-R analysis updated in 2019. 
 Speel Lake is located on mainland Alaska, in the Speel Arm of Port Snettisham, approximately 50 km southeast of Juneau, Alaska. Speel Lake sockeye salmon are harvested in traditional mixed stock commercial drift gillnet fisheries in District 11 and in terminal hatchery fisheries in Speel Arm. Escapements have been enumerated annually at an adult counting weir at the outlet of the lake in all but two years since 1983 (the weir has been operated by Douglas Island Pink and Chum, Inc. since 1996). Weir counts during most of the 1980s and 1990s underestimated the escapement, however, due to early removal of the weir. Speel Lake harvests have been estimated annually in conjunction with U.S./Canada stock identification programs to allocate harvests in the District 11 drift gillnet fisheries. 
 
