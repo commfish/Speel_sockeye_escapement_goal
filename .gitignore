@@ -15,6 +15,3 @@
 .exe.lnk  
 .lnk
 
-# files with individual MCMC outputs
-**/stats_output.csv
-**/Stats_output.csv
