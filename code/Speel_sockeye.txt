@@ -43,6 +43,8 @@ model
     U.msy.c2 <- lnalpha.c.nonneg * peterman.approx.c
     S.msy.c2 <- U.msy.c2/beta
     U.max.c2 <- 1 - 1/exp(lnalpha.c.nonneg)
+    R.msy.c <- S.msy.c * exp(lnalpha.c - beta * S.msy.c)
+    MSY.c <- R.msy.c - S.msy.c
     D.scale ~ dunif(0.00000E+00, 1)
     D.sum <- 1/(D.scale * D.scale)
     pi.2p ~ dbeta(1, 1)

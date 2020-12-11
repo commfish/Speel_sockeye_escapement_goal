@@ -1,8 +1,8 @@
-#Taku sockeye state space model
-#authors: Sara E Miller & Gottfried Pestal
-#contact: sara.miller@alaska.gov; 907-465-4245
-#Last edited: July 2020
-#must download program JAGS for this script to work
+# Speel Lake sockeye state space model
+# authors: Sara E Miller (part of original code from Gottfried Pestal)
+# contact: sara.miller@alaska.gov; 907-465-4245
+# Last edited: December 2020
+# must download program JAGS for this script to work
 # For the final model run, 2012-2013 were included in the data
 
 # warning: some of these packages mask commands, so need to specify the package when calling the fn
@@ -25,9 +25,9 @@ library(ggplot2)
 library(mcmcplots)
 library(scales)
 library(cowplot)
-install.packages("devtools")
-devtools::install_github("ben-williams/FNGr")
-library(FNGr)
+library("devtools")
+devtools::install_github("commfish/fngr")
+library(fngr)
 library(extrafont)
 
 # STEP 1: CHOOSE SETTINGS----
@@ -89,7 +89,7 @@ if(package.use == "rjags" & sensitivity.analysis == 0){
                   'sigma.R','log.resid.0', 'mean.log.R0','log.resid',
                   'S','R','N','pi','H.B','N.ya','mu.HB',
                   'p','q', 'S.max','D.sum','sigma.R0',
-                  'S.eq.c', 'U.msy.c', 'S.msy.c', 'B.sum')
+                  'S.eq.c', 'U.msy.c', 'S.msy.c', 'B.sum', 'MSY.c')
   
   jmod <- rjags::jags.model(file='code/Speel_sockeye.txt', data=dat, n.chains=3, inits=inits, n.adapt=n.adapt.use) 
   stats::update(jmod, n.iter=n.iter.use, by=by.use, progress.bar='text', DIC=T, n.burnin=n.burnin.use) # this modifies the original object, function returns NULL
@@ -99,6 +99,7 @@ end.jags <- proc.time()   # store time for MCMC
 post.arr <- as.array(post) # convert to an accessible obj
 
 # run the script that generates all the outputs 
-source("code/2_GENERATE_OUTPUTS.R")
+# source("code/2_GENERATE_OUTPUTS.R") # it is best when making changes or updating paramters, to run the GENERATE_OUPUTS.R code
+# seperate and not within the RUN_MODEL.R code
 }
 

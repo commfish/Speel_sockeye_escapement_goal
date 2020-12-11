@@ -50,6 +50,8 @@ mod=function() {
   U.msy.c2 <- lnalpha.c.nonneg * peterman.approx.c 
   S.msy.c2 <- U.msy.c2 / beta  
   U.max.c2 <- 1 - 1 / exp(lnalpha.c.nonneg) 
+  R.msy.c <- S.msy.c * exp(lnalpha.c - beta * S.msy.c)
+  MSY.c <- R.msy.c - S.msy.c
   
   #GENERATE Y+A-1 = 42 MATURITY SCHEDULES, ONE PER BROOD YEAR USING THE DIRICHLET DISTRIB. (Eq.4-6)
   # "pi" (central tendency of "p"), and "D.scale" (dispersion of "p")

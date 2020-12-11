@@ -1,4 +1,4 @@
-# THIS SCRIPT IS SOURCED FROM INSIDE 1_RUN_MODEL.R
+# THIS SCRIPT CAN BE SOURCED FROM INSIDE 1_RUN_MODEL.R
 #(if package.use = "rjags") 
 
 # - post.samp and post 
@@ -19,7 +19,7 @@ parameters <- c('alpha','beta', 'alpha.c', 'lnalpha','lnalpha.c','phi',
                 'sigma.R','log.resid.0', 'mean.log.R0','log.resid',
                 'S','R','N','pi','H.B','N.ya','mu.HB',
                 'p','q', 'S.max','D.sum','sigma.R0',
-                'S.eq.c', 'U.msy.c', 'S.msy.c', 'B.sum')
+                'S.eq.c', 'U.msy.c', 'S.msy.c', 'B.sum','MSY.c')
 
 # Numerical summary of each parameter (mean, median, quantiles of posteriers)----
 summary<-summary(post)  
@@ -127,6 +127,11 @@ x <- post.arr[,parameters,]
 B.sum<-quantile(x, probs=c(0, 0.025, 0.05, 0.5, 0.95, 0.975, 1))
 B.sum <- data.frame(B.sum)
 
+parameters=c('MSY.c')
+x <- post.arr[,parameters,]
+MSY.c<-quantile(x, probs=c(0, 0.025, 0.05, 0.5, 0.95, 0.975, 1))
+MSY.c <- data.frame(MSY.c)
+
 parameters=c('pi[1]')
 x <- post.arr[,parameters,]
 pi<-quantile(x, probs=c(0, 0.025, 0.05, 0.5, 0.95, 0.975, 1))
@@ -152,10 +157,11 @@ step7 <- cbind(step6, S.eq.c)
 step8 <- cbind(step7, S.max)
 step9 <- cbind(step8, D.sum)
 step10 <- cbind(step9, B.sum)
-step11 <- cbind(step10, pi1)
-step12 <- cbind(step11, pi2)
-step13 <- cbind(step12, pi3)
-step13 %>% 
+step11 <- cbind(step10, MSY.c)
+step12 <- cbind(step11, pi1)
+step13 <- cbind(step12, pi2)
+step14 <- cbind(step13, pi3)
+step14 %>% 
   t()%>%
 write.csv(., file= paste0(out.path,"/percentiles.csv")) 
 
@@ -216,6 +222,7 @@ p_q_Nya %>% mutate(age = as.character(age))
 write.csv(p_q_Nya, file= paste0(out.path,"/p_q_Nya.csv")) 
 
 # parameters file----
+# this section needs to be reworked if another parameter is added
 data.frame(quants) %>% 
   rownames_to_column('variable') -> quants
 quants %>%
@@ -242,6 +249,7 @@ quants %>%
   filter(!str_detect(variable, "S.msy.c")) %>%
   filter(!str_detect(variable, "S.msy.c2")) %>%
   filter(!str_detect(variable, "lnRS")) %>%
+  filter(!str_detect(variable, "MSY.c")) %>%
   rename_at(vars(starts_with("X")), 
             funs(str_replace(., "X", "S"))) %>%
   dplyr::select(-c(variable))-> df
