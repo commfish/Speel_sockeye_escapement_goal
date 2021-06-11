@@ -13,4 +13,6 @@ The Speel Lake sockeye salmon run was managed for informal escapement goals of 1
  
 Heinl, S. C., S. Miller, and J. A. Bednarski. 2014. Speel Lake sockeye salmon stock status and escapement goal review. Alaska Department of Fish and Game, Fishery Manuscript No. 14-04, Anchorage. 
 
+Heinl et al. 2020 (FMS; in draft)
+
 Riffe, R. and J. H. Clark. 2003. Biological escapement goal for Speel Lake sockeye salmon. Alaska Department of Fish and Game, Division of Commercial Fisheries, Regional Information Report 1J03-34, Juneau.
